@@ -15,14 +15,14 @@ class App extends Component {
 
     this.state = {
       messages: [],
-      categories: [],
+      categories: [], // List of string names (category names)
       current_state: STATES.SIGNED_OUT,
-      answer: []
     };
 
     this.onSubmitAnswer = this.onSubmitAnswer.bind(this);
     this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
     this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
+    this.onChangeAnswer = this.onChangeAnswer.bind(this);
     this.login = () => { auth.signInAnonymously() };
   }
 
@@ -51,10 +51,20 @@ class App extends Component {
     })
   }
 
-  onChangeAnswer(event) {
-    // Each time the user edits their answer, the result gets store in
-    // this.state.answers.{category index}
+  onChangeAnswer(category_id, event) {
+    var index = GetIndexForCategoryId(category_id)
 
+    // Preferred way to modify an element in a state array:
+    // https://stackoverflow.com/a/42037439/6606953
+    const new_categories = this.state.categories // copy the array
+    new_categories[index].answer = event.target.value; // manipulate data
+    this.setState({categories: new_categories}) // set the new state
+
+    // It's not recommended to print values right after setState because setState
+    // may be deferred. But in my experience it's fine and it's been helpful enough.
+    for (var i = 0; i < this.state.categories.length; i++) {
+        PrintCategory(this.state.categories[i])
+    }
   }
 
   onSubmitAnswer(event) {
@@ -84,7 +94,7 @@ class App extends Component {
         {this.state.categories.map((el, index) =>
           <form onSubmit={this.onSubmitAnswer}>
             <label>{el.name}</label><br></br>
-            <input type="text" ref={(node) => { this.input = node }}/>
+            <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)} ref={(node) => { this.input = node }}/>
             <ul>
               {this.state.messages.map(message =>
                 <li key={message.id}>{message.text}</li>
@@ -136,9 +146,30 @@ function NumCategoriesForm(props) {
     );
 }
 
+function GenerateCategoryId(index) {
+    // Helper function to generate a category ID using the given index.
+    // The given index should be an integer, and the category ID is a
+    // string with the form 'category-{index}`. For example, `category-13`.
+    return `category-${index}`
+}
+
+function GetIndexForCategoryId(id) {
+    // Helper function to find the appropriate item in the category
+    // array using the given category ID. This is a simple implementation
+    // and simply just matches for number after the hyphen (-).
+
+    var match = id.match(/(?:-)(\d+)$/)[1]; // 23
+    return match
+}
+
+function PrintCategory(c) {
+    // Pretty-print function for category
+    console.log(JSON.stringify(c, undefined, 2))
+}
+
 function GenerateRandomCategories(size) {
     // Choose {size} categories from the following premade list
-    var possible_categories = [
+    const possible_categories = [
       "A boy’s name",
       "A river",
       "An animal",
@@ -157,10 +188,20 @@ function GenerateRandomCategories(size) {
     for (var i = 0; i < size; i++) {
         // Choose a random category
         var random_index = Math.floor(Math.random() * possible_categories.length)
-        chosen_categories.push({ name: possible_categories[random_index] })
+        chosen_categories.push({ 
+            id: GenerateCategoryId(i),
+            name: possible_categories[random_index],
+            answer: "DEADBEEF" // Placeholder for now
+        })
         // Remove the chosen category from the list so we don't get duplicates
         possible_categories.splice(random_index, 1)
     }
+
+    for (var j = 0; j < chosen_categories.length; j++) {
+      const c = chosen_categories[j];
+      PrintCategory(c);
+    }
+
     return chosen_categories;
 }
 
