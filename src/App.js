@@ -3,10 +3,12 @@ import { database, auth } from './firebase';
 import Button from '@material-ui/core/Button';
 
 const STATES = {
-    SIGNED_OUT: 'signed_out',
-    SIGNED_IN:  'signed_in',
-    RUN_GAME:   'run_game',
-    SHOW_RESULT:'show_result'
+    SIGNED_OUT:       'signed_out',
+    CHOOSE_ROOM:      'choose_room',
+    GAME_LOBBY:       'game_lobby',
+    CHOOSE_NUM_CATEG: 'num_categ',
+    RUN_GAME:         'run_game',
+    SHOW_RESULT:      'show_result'
 }
 
 class App extends Component {
@@ -17,8 +19,12 @@ class App extends Component {
       messages: [],
       categories: [], // List of string names (category names)
       current_state: STATES.SIGNED_OUT,
+      room_code: null,
+      numUsers: null
     };
 
+    this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
+    this.onChangeRoomCode = this.onChangeRoomCode.bind(this);
     this.onClickAnswerSubmission = this.onClickAnswerSubmission.bind(this);
     this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
     this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
@@ -44,11 +50,37 @@ class App extends Component {
             messages: [ message, ...prevState.messages ],
           }));
         });
-        this.setState({current_state: STATES.SIGNED_IN})
+        this.setState({current_state: STATES.CHOOSE_ROOM})
       } else {
         this.setState({current_state: STATES.SIGNED_OUT})
       }
     })
+  }
+
+  onSubmitRoomCode(event) {
+    event.preventDefault();
+
+    // Add user to list of players waiting in lobby
+    var uid = auth.currentUser.uid;
+    database.ref(this.state.room_code).child('players').push(uid);
+    this.setState({current_state: STATES.WAIT_LOBBY})
+
+    // Add callback to read users from the given room code
+    const messagesRef = database.ref(this.state.room_code).child('players')
+      .orderByKey()
+      .limitToLast(100);
+
+    // 'value' seems better than 'child_added' because we want to update 
+    // both when someone joins and when someone leaves
+    messagesRef.on('value', snapshot => {
+      this.setState({ numUsers: snapshot.numChildren() })
+    }, function(err) {
+      alert(`The read failed: ${err.code}`)
+    });
+  }
+
+  onChangeRoomCode(event) {
+    this.setState({room_code: event.target.value})
   }
 
   onChangeAnswer(category_id, event) {
@@ -78,7 +110,8 @@ class App extends Component {
       var c = this.state.categories[i];
       const c_str = JSON.stringify(c, undefined, 2);
       console.log(c_str);
-      database.ref(uid).push(c_str);
+
+      database.ref(this.state.room_code).child(uid).push(c_str);
     }
   }
 
@@ -87,8 +120,9 @@ class App extends Component {
   }
 
   onSubmitNumCategories(event) {
-    this.setState({current_state: STATES.RUN_GAME})
     event.preventDefault();
+
+    this.setState({current_state: STATES.RUN_GAME})
   }
 
   render() {
@@ -104,17 +138,22 @@ class App extends Component {
       </div>
 
     let mainDisplay;
+    const current_state = this.state.current_state
 
-    if (this.state.current_state === STATES.SIGNED_OUT) {
+    if (current_state === STATES.SIGNED_OUT) {
       mainDisplay = <LoginButton onClick={this.login} />;
-    } else {
-        if (this.state.categories !== [] &&
-            this.state.current_state === STATES.RUN_GAME) {
+    } else if (current_state === STATES.CHOOSE_ROOM){
+      mainDisplay = <RoomCodeForm onSubmit={this.onSubmitRoomCode} onChange={this.onChangeRoomCode} />
+    } else if (current_state === STATES.WAIT_LOBBY) {
+      // Show room code and # of people connected to room
+      mainDisplay = <pre>Room Code: {this.state.room_code} <br></br># of Users: {this.state.numUsers}</pre>
+
+    } else if (current_state === STATES.CHOOSE_NUM_CATEG) {
+      mainDisplay = <NumCategoriesForm onSubmit={this.onSubmitNumCategories}
+                     onChange={this.onChangeNumCategories} />;
+    } else if (this.state.categories !== [] &&
+               this.state.current_state === STATES.RUN_GAME) {
             mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
-        } else {
-            mainDisplay = <NumCategoriesForm onSubmit={this.onSubmitNumCategories}
-                           onChange={this.onChangeNumCategories} />;
-        }
     }
 
     return (
@@ -129,6 +168,18 @@ function LoginButton(props) {
       <Button variant="contained" color="primary" onClick={props.onClick}>
         Anonymous Login
       </Button>
+    );
+}
+
+function RoomCodeForm(props) {
+    return (
+        <form onSubmit={props.onSubmit}>
+          <label>
+            Enter room code:
+            <input type="text" onChange={props.onChange}/>
+          </label>
+          <input type="submit" value="Submit"/>
+        </form>
     );
 }
 
