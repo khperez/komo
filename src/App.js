@@ -9,11 +9,12 @@ import GameView from './components/GameView';
 import AdminView from './components/AdminView';
 
 const STATES = {
-    SIGNED_OUT:       'signed_out',
-    CHOOSE_ROOM:      'choose_room',
-    GAME_LOBBY:       'game_lobby',
-    RUN_GAME:         'run_game',
-    SHOW_RESULT:      'show_result'
+    SIGNED_OUT:  'signed_out',
+    CHOOSE_NAME: 'choose_name',
+    CHOOSE_ROOM: 'choose_room',
+    GAME_LOBBY:  'game_lobby',
+    RUN_GAME:    'run_game',
+    SHOW_RESULT: 'show_result'
 }
 
 class App extends Component {
@@ -22,7 +23,7 @@ class App extends Component {
 
     this.state = {
       messages: [],
-      categories: [], // List of string names (category names)
+      local_categories: [],
       current_state: STATES.SIGNED_OUT,
       roomCode: null,
       numUsers: null,
@@ -32,9 +33,12 @@ class App extends Component {
       isLobby: false,
       isJoin: false,
       isGameRunning: false,
-      currentUser: null
+      currentUser: null,
+      user_name: ''
     };
 
+    this.onSubmitUserName = this.onSubmitUserName.bind(this);
+    this.onChangeUserName = this.onChangeUserName.bind(this);
     this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
     this.onChangeRoomCode = this.onChangeRoomCode.bind(this);
     this.onClickAnswerSubmission = this.onClickAnswerSubmission.bind(this);
@@ -65,6 +69,15 @@ class App extends Component {
     });
   }
 
+  onChangeUserName(event) {
+    this.setState({user_name: event.target.value})
+  }
+
+  onSubmitUserName(event) {
+    event.preventDefault();
+    this.setState({current_state: STATES.CHOOSE_ROOM})
+  }
+
   onSubmitRoomCode(event) {
     event.preventDefault();
 
@@ -74,23 +87,61 @@ class App extends Component {
     database.ref(this.state.roomCode).child('players').push(uid);
     this.setState({current_state: STATES.GAME_LOBBY})
 
+    // Write user name to database (We couldn't do this earlier because we did not
+    // have a room code yet)
+    var name = this.state.user_name
+    database.ref(this.state.room_code).child('players').child(uid).child('name').set(name);
+
+    // Decide if we're a host or not
+    const hostRef = database.ref(this.state.room_code).child('host')
+    hostRef.once('value', snapshot => {
+      if (!snapshot.exists()) {
+        database.ref(this.state.room_code).child('host').set(uid);
+        this.setState({isHost: true})
+      } else {
+        const categoriesRef = database.ref(this.state.room_code).child('local_categories')
+        categoriesRef.on('value', snapshot => {
+          if (snapshot.exists()) {
+            let categories = []
+            for (var i = 0; i < snapshot.val().length; i++) {
+              categories.push({
+                id: i,
+                name: snapshot.val()[i],
+                answer: ""
+              })
+            }
+            this.setState({local_categories: categories})
+          }
+        }, function(err) {
+          alert(`isGameStart read failed: ${err.code}`)
+        });
+      }
+    }, function(err) {
+      alert(`host read failed: ${err.code}`)
+    });
+
+    // Listen for players in the same room as us
+    const playersRef = database.ref(this.state.room_code).child('players')
+      .orderByKey()
+      .limitToLast(100);
+    playersRef.on('value', snapshot => {
+      this.setState({ numUsers: snapshot.numChildren() })
+    }, function(err) {
+      alert(`players read failed: ${err.code}`)
+    });
 
     // Listen for signal to start the game
     const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted')
     isGameStartedRef.on('value', snapshot => {
-      // Value gives us a list. We're expecting the list to be size 1,
-      // but we still must iterating through the list using .forEach()
-      // to get the one thing we want.
-      snapshot.forEach(childSnapshot => {
-          let isGameStarted = childSnapshot.val()
-          // TODO: fix "===" warning
-          if (isGameStarted == true) {
-             this.setState({current_state: STATES.RUN_GAME})
-          }
-      });
+      if (snapshot.val() === true) {
+         this.setState({current_state: STATES.RUN_GAME})
+      }
     }, function(err) {
       alert(`isGameStart read failed: ${err.code}`)
     });
+
+    // Time to wait in lobby
+    this.setState({current_state: STATES.GAME_LOBBY})
   }
 
   onChangeRoomCode(event) {
@@ -98,36 +149,32 @@ class App extends Component {
   }
 
   onChangeAnswer(category_id, event) {
-    var index = GetIndexForCategoryId(category_id)
-
     // Preferred way to modify an element in a state array:
     // https://stackoverflow.com/a/42037439/6606953
-    const new_categories = this.state.categories // copy the array
-    new_categories[index].answer = event.target.value; // manipulate data
-    this.setState({categories: new_categories}) // set the new state
+    const new_categories = this.state.local_categories // copy the array
+    new_categories[category_id].answer = event.target.value; // manipulate data
+    this.setState({loca_categories: new_categories}) // set the new state
+  }
 
-    // It's not recommended to print values right after setState because setState
-    // may be deferred. But in my experience it's fine and it's been helpful enough.
-    for (var i = 0; i < this.state.categories.length; i++) {
-        ConsoleLogCategory(this.state.categories[i])
-    }
+  onClickStartButton(event) {
+    // Notify non-host players that the game is starting
+    database.ref(this.state.room_code).child('isGameStarted').set(true);
   }
 
   onClickAnswerSubmission(event) {
     event.preventDefault();
 
-    for (var i = 0; i < this.state.categories.length; i++) {
-      var c = this.state.categories[i];
-      const c_str = JSON.stringify(c, undefined, 2);
-      console.log(c_str);
-
-      var uid = auth.currentUser.uid;
-      database.ref(this.state.room_code).child(uid).push(c_str);
+    // Push the user-provided answers to the database
+    let answers = []
+    for (var i = 0; i < this.state.local_categories.length; i++) {
+      answers.push(this.state.local_categories[i].answer)
     }
+    let uid = auth.currentUser.uid;
+    database.ref(this.state.room_code).child('players').child(uid).child('answers').set(answers);
   }
 
   onChangeNumCategories(event) {
-    this.setState({categories: GenerateRandomCategories(event.target.value) })
+    this.setState({local_categories: GenerateRandomCategories(event.target.value) })
   }
 
   onSubmitNumCategories(event) {
@@ -136,6 +183,14 @@ class App extends Component {
     // Stop the user from changing the number of catergories once the submit
     // button is pressed.
     this.setState({hideNumCategoriesForm: true})
+
+    // Share the category list with other players in the same room
+    // (Need to sanitize it first by removing answer and id field)
+    let categories = [];
+    for (var i = 0; i < this.state.local_categories.length; i++) {
+      categories.push(this.state.local_categories[i].name)
+    }
+    database.ref(this.state.room_code).child('local_categories').set(categories);
   }
 
   login = () => {
@@ -256,6 +311,26 @@ class App extends Component {
   } 
 }
 
+function LoginButton(props) {
+    return (
+      <Button variant="contained" color="primary" onClick={props.onClick}>
+        Anonymous Login
+      </Button>
+    );
+}
+
+function UserNameForm(props) {
+    return (
+        <form onSubmit={props.onSubmit}>
+          <label>
+            Enter name:
+            <input type="text" onChange={props.onChange}/>
+          </label>
+          <input type="submit" value="Submit"/>
+        </form>
+    );
+}
+
 function RoomCodeForm(props) {
     return (
         <form onSubmit={props.onSubmit}>
@@ -278,22 +353,6 @@ function NumCategoriesForm(props) {
           <input type="submit" value="Submit"/>
         </form>
     );
-}
-
-function GenerateCategoryId(index) {
-    // Helper function to generate a category ID using the given index.
-    // The given index should be an integer, and the category ID is a
-    // string with the form 'category-{index}`. For example, `category-13`.
-
-    return `category-${index}`
-}
-
-function GetIndexForCategoryId(id) {
-    // Helper function to find the appropriate item in the category
-    // array using the given category ID. This is a simple implementation
-    // and simply just matches for number after the hyphen (-).
-
-    return id.match(/(?:-)(\d+)$/)[1];
 }
 
 function ConsoleLogCategory(c) {
@@ -322,8 +381,8 @@ function GenerateRandomCategories(size) {
     for (var i = 0; i < size; i++) {
         // Choose a random category
         var random_index = Math.floor(Math.random() * possible_categories.length)
-        chosen_categories.push({ 
-            id: GenerateCategoryId(i),
+        chosen_categories.push({
+            id: i,
             name: possible_categories[random_index],
             answer: ""
         })
