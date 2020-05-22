@@ -123,9 +123,9 @@ class App extends Component {
     }
   }
 
-  onClickStartButton(event) {   
+  onClickStartButton = () => {
     // Notify non-host players that the game is starting
-    database.ref(this.state.room_code).child('isGameStarted').push(true);
+    database.ref(this.state.roomCode).child('isGameStarted').push(true);
     // TODO: I think this line can be removed actually becaues we can have
     // the host listening for the start signal uisng isGameStartedRef
     this.setState({current_state: STATES.RUN_GAME})
@@ -158,7 +158,7 @@ class App extends Component {
   
   generateRoomCode = (length = 4) => {
     var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789';
+    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456790';
     var charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
        result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -247,7 +247,8 @@ class App extends Component {
         {this.state.isStart 
           && <StartView onCreate={this.onCreate}
                         onJoin={this.onJoin}/>}
-        {this.state.isHost && <HostView code={this.state.roomCode}/>}
+        {this.state.isHost && <HostView code={this.state.roomCode}
+                                        onClick={this.onClickStartButton}/>}
         {this.state.isJoin && <JoinView/>}
         {this.state.isLobby && <LobbyView/>}
       </div>

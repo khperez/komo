@@ -16,15 +16,7 @@ function CreateButton({ onCreate }) {
     )
 }
 
-function StartButton(props) {
-    return (
-      <Button variant="contained" color="secondary" onClick={props.onClick}>
-        Start Game!
-      </Button>
-    );
-}
-  
-function JoinButton({ onJoin }) {
+export function JoinButton({ onJoin }) {
     return (
         <Button variant="contained" onClick={ onJoin }>Join Game</Button>
     )
@@ -32,7 +24,6 @@ function JoinButton({ onJoin }) {
 
 export default function GameActions({ onCreate, onJoin }) {
     const classes = useStyles();
-
     return (
         <div className={classes.root}>
             <CreateButton onCreate={onCreate}/>
