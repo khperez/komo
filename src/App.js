@@ -19,7 +19,7 @@ class App extends Component {
       current_state: STATES.SIGNED_OUT,
     };
 
-    this.onSubmitAnswers = this.onSubmitAnswers.bind(this);
+    this.onClickAnswerSubmission = this.onClickAnswerSubmission.bind(this);
     this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
     this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
     this.onChangeAnswer = this.onChangeAnswer.bind(this);
@@ -67,10 +67,8 @@ class App extends Component {
     }
   }
 
-  onSubmitAnswers(event) {
+  onClickAnswerSubmission(event) {
     event.preventDefault();
-
-    console.log('onSubmitAnswers')
 
     // We use the user id (uid) to ensure each user writes to an unique location
     // in the database
@@ -82,8 +80,6 @@ class App extends Component {
       console.log(c_str);
       database.ref(uid).push(c_str);
     }
-    
-    this.input.value = '';
   }
 
   onChangeNumCategories(event) {
@@ -102,12 +98,7 @@ class App extends Component {
         {this.state.categories.map((el, index) =>
           <form>
             <label>{el.name}</label><br></br>
-            <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)} ref={(node) => { this.input = node }}/>
-            <ul>
-              {this.state.messages.map(message =>
-                <li key={message.id}>{message.text}</li>
-              )}
-            </ul>
+            <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)}/>
           </form>
         )}
       </div>
@@ -119,7 +110,7 @@ class App extends Component {
     } else {
         if (this.state.categories !== [] &&
             this.state.current_state === STATES.RUN_GAME) {
-            mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onSubmitAnswers} /></div>
+            mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
         } else {
             mainDisplay = <NumCategoriesForm onSubmit={this.onSubmitNumCategories}
                            onChange={this.onChangeNumCategories} />;
