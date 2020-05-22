@@ -19,7 +19,7 @@ class App extends Component {
       current_state: STATES.SIGNED_OUT,
     };
 
-    this.onSubmitAnswer = this.onSubmitAnswer.bind(this);
+    this.onSubmitAnswers = this.onSubmitAnswers.bind(this);
     this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
     this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
     this.onChangeAnswer = this.onChangeAnswer.bind(this);
@@ -67,14 +67,22 @@ class App extends Component {
     }
   }
 
-  onSubmitAnswer(event) {
+  onSubmitAnswers(event) {
     event.preventDefault();
+
+    console.log('onSubmitAnswers')
 
     // We use the user id (uid) to ensure each user writes to an unique location
     // in the database
     var uid = auth.currentUser.uid;
-    database.ref(uid).push(this.input.value);
 
+    for (var i = 0; i < this.state.categories.length; i++) {
+      var c = this.state.categories[i];
+      const c_str = JSON.stringify(c, undefined, 2);
+      console.log(c_str);
+      database.ref(uid).push(c_str);
+    }
+    
     this.input.value = '';
   }
 
@@ -92,7 +100,7 @@ class App extends Component {
     let AnswerForms =
       <div>
         {this.state.categories.map((el, index) =>
-          <form onSubmit={this.onSubmitAnswer}>
+          <form>
             <label>{el.name}</label><br></br>
             <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)} ref={(node) => { this.input = node }}/>
             <ul>
@@ -111,7 +119,7 @@ class App extends Component {
     } else {
         if (this.state.categories !== [] &&
             this.state.current_state === STATES.RUN_GAME) {
-            mainDisplay = <div>{AnswerForms}</div>
+            mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onSubmitAnswers} /></div>
         } else {
             mainDisplay = <NumCategoriesForm onSubmit={this.onSubmitNumCategories}
                            onChange={this.onChangeNumCategories} />;
@@ -122,8 +130,7 @@ class App extends Component {
       <div>
         {mainDisplay}
       </div>
-    );
-  }
+    ); }
 }
 
 function LoginButton(props) {
@@ -205,5 +212,12 @@ function GenerateRandomCategories(size) {
     return chosen_categories;
 }
 
+function SubmitAnswersButton(props) {
+    return (
+      <Button variant="contained" color="primary" onClick={props.onClick}>
+        Submit Answers
+      </Button>
+    );
+}
 
 export default App;
