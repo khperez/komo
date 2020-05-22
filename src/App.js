@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { database, auth } from './firebase';
 import Button from '@material-ui/core/Button';
+import BasicTextFields from './components/GameForm';
 
 const STATES = {
     SIGNED_OUT:       'signed_out',
@@ -10,6 +11,27 @@ const STATES = {
     RUN_GAME:         'run_game',
     SHOW_RESULT:      'show_result'
 }
+
+const Title = () => (
+  <div className="App-title">
+    Komo
+  </div>
+);
+
+const CreateButton = () => (
+  <div>
+    <Button variant="contained" className="Button-create">Create Game</Button>
+  </div>
+)
+
+const JoinButton = () => (
+  <div>
+    <Button variant="contained">Join Game</Button>
+  </div>
+)
+
+
+
 
 class App extends Component {
   constructor(props) {
@@ -157,10 +179,13 @@ class App extends Component {
     }
 
     return (
-      <div>
-        {mainDisplay}
+      <div className="App">
+        <Title />
+        <GameActions />
+        <BasicTextFields />
       </div>
-    ); }
+    );
+  } 
 }
 
 function LoginButton(props) {
