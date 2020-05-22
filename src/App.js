@@ -4,11 +4,12 @@ import Button from '@material-ui/core/Button';
 import BasicTextFields from './components/GameForm';
 
 const STATES = {
-    SIGNED_OUT:       'signed_out',
-    CHOOSE_ROOM:      'choose_room',
-    GAME_LOBBY:       'game_lobby',
-    RUN_GAME:         'run_game',
-    SHOW_RESULT:      'show_result'
+    SIGNED_OUT:  'signed_out',
+    CHOOSE_NAME: 'choose_name',
+    CHOOSE_ROOM: 'choose_room',
+    GAME_LOBBY:  'game_lobby',
+    RUN_GAME:    'run_game',
+    SHOW_RESULT: 'show_result'
 }
 
 const Title = () => (
@@ -38,14 +39,17 @@ class App extends Component {
 
     this.state = {
       messages: [],
-      categories: [], // List of string names (category names)
+      local_categories: [],
       current_state: STATES.SIGNED_OUT,
       room_code: null,
       numUsers: null,
       isHost: false,
-      hideNumCategoriesForm: false
+      hideNumCategoriesForm: false,
+      user_name: ''
     };
 
+    this.onSubmitUserName = this.onSubmitUserName.bind(this);
+    this.onChangeUserName = this.onChangeUserName.bind(this);
     this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
     this.onChangeRoomCode = this.onChangeRoomCode.bind(this);
     this.onClickAnswerSubmission = this.onClickAnswerSubmission.bind(this);
@@ -63,22 +67,20 @@ class App extends Component {
 
     auth.onAuthStateChanged((user) => {
       if (user) {
-        const messagesRef = database.ref(user.uid)
-          .orderByKey()
-          .limitToLast(100);
-
-        messagesRef.on('child_added', snapshot => {
-          const message = { text: snapshot.val(), id: snapshot.key };
-
-          this.setState(prevState => ({
-            messages: [ message, ...prevState.messages ],
-          }));
-        });
-        this.setState({current_state: STATES.CHOOSE_ROOM})
+        this.setState({current_state: STATES.CHOOSE_NAME})
       } else {
         this.setState({current_state: STATES.SIGNED_OUT})
       }
     })
+  }
+
+  onChangeUserName(event) {
+    this.setState({user_name: event.target.value})
+  }
+
+  onSubmitUserName(event) {
+    event.preventDefault();
+    this.setState({current_state: STATES.CHOOSE_ROOM})
   }
 
   onSubmitRoomCode(event) {
@@ -86,9 +88,38 @@ class App extends Component {
 
     var uid = auth.currentUser.uid;
 
-    // Add current user to list of players waiting in lobby
-    database.ref(this.state.room_code).child('players').push(uid);
-    this.setState({current_state: STATES.GAME_LOBBY})
+    // Write user name to database (We couldn't do this earlier because we did not
+    // have a room code yet)
+    var name = this.state.user_name
+    database.ref(this.state.room_code).child('players').child(uid).child('name').set(name);
+
+    // Decide if we're a host or not
+    const hostRef = database.ref(this.state.room_code).child('host')
+    hostRef.once('value', snapshot => {
+      if (!snapshot.exists()) {
+        database.ref(this.state.room_code).child('host').set(uid);
+        this.setState({isHost: true})
+      } else {
+        const categoriesRef = database.ref(this.state.room_code).child('local_categories')
+        categoriesRef.on('value', snapshot => {
+          if (snapshot.exists()) {
+            let categories = []
+            for (var i = 0; i < snapshot.val().length; i++) {
+              categories.push({
+                id: i,
+                name: snapshot.val()[i],
+                answer: ""
+              })
+            }
+            this.setState({local_categories: categories})
+          }
+        }, function(err) {
+          alert(`isGameStart read failed: ${err.code}`)
+        });
+      }
+    }, function(err) {
+      alert(`host read failed: ${err.code}`)
+    });
 
     // Listen for players in the same room as us
     const playersRef = database.ref(this.state.room_code).child('players')
@@ -100,33 +131,18 @@ class App extends Component {
       alert(`players read failed: ${err.code}`)
     });
 
-    // If we're the first player, take role as host
-    const hostRef = database.ref(this.state.room_code).child('host')
-    hostRef.once('value', snapshot => {
-      // eslint-disable-next-line 
-      if (snapshot.numChildren() == 0) {
-        database.ref(this.state.room_code).child('host').push(uid);
-        this.setState({isHost: true})
-      }
-    }, function(err) {
-      alert(`host read failed: ${err.code}`)
-    });
-
     // Listen for signal to start the game
     const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted')
     isGameStartedRef.on('value', snapshot => {
-      // Value gives us a list. We're expecting the list to be size 1,
-      // but we still must iterating through the list using .forEach()
-      // to get the one thing we want.
-      snapshot.forEach(childSnapshot => {
-          let isGameStarted = childSnapshot.val()
-          if (isGameStarted == true) {
-             this.setState({current_state: STATES.RUN_GAME})
-          }
-      });
+      if (snapshot.val() === true) {
+         this.setState({current_state: STATES.RUN_GAME})
+      }
     }, function(err) {
       alert(`isGameStart read failed: ${err.code}`)
     });
+
+    // Time to wait in lobby
+    this.setState({current_state: STATES.GAME_LOBBY})
   }
 
   onChangeRoomCode(event) {
@@ -134,44 +150,32 @@ class App extends Component {
   }
 
   onChangeAnswer(category_id, event) {
-    var index = GetIndexForCategoryId(category_id)
-
     // Preferred way to modify an element in a state array:
     // https://stackoverflow.com/a/42037439/6606953
-    const new_categories = this.state.categories // copy the array
-    new_categories[index].answer = event.target.value; // manipulate data
-    this.setState({categories: new_categories}) // set the new state
-
-    // It's not recommended to print values right after setState because setState
-    // may be deferred. But in my experience it's fine and it's been helpful enough.
-    for (var i = 0; i < this.state.categories.length; i++) {
-        ConsoleLogCategory(this.state.categories[i])
-    }
+    const new_categories = this.state.local_categories // copy the array
+    new_categories[category_id].answer = event.target.value; // manipulate data
+    this.setState({loca_categories: new_categories}) // set the new state
   }
 
-  onClickStartButton(event) {   
+  onClickStartButton(event) {
     // Notify non-host players that the game is starting
-    database.ref(this.state.room_code).child('isGameStarted').push(true);
-    // TODO: I think this line can be removed actually becaues we can have
-    // the host listening for the start signal uisng isGameStartedRef
-    this.setState({current_state: STATES.RUN_GAME})
+    database.ref(this.state.room_code).child('isGameStarted').set(true);
   }
 
   onClickAnswerSubmission(event) {
     event.preventDefault();
 
-    for (var i = 0; i < this.state.categories.length; i++) {
-      var c = this.state.categories[i];
-      const c_str = JSON.stringify(c, undefined, 2);
-      console.log(c_str);
-
-      var uid = auth.currentUser.uid;
-      database.ref(this.state.room_code).child(uid).push(c_str);
+    // Push the user-provided answers to the database
+    let answers = []
+    for (var i = 0; i < this.state.local_categories.length; i++) {
+      answers.push(this.state.local_categories[i].answer)
     }
+    let uid = auth.currentUser.uid;
+    database.ref(this.state.room_code).child('players').child(uid).child('answers').set(answers);
   }
 
   onChangeNumCategories(event) {
-    this.setState({categories: GenerateRandomCategories(event.target.value) })
+    this.setState({local_categories: GenerateRandomCategories(event.target.value) })
   }
 
   onSubmitNumCategories(event) {
@@ -180,13 +184,21 @@ class App extends Component {
     // Stop the user from changing the number of catergories once the submit
     // button is pressed.
     this.setState({hideNumCategoriesForm: true})
+
+    // Share the category list with other players in the same room
+    // (Need to sanitize it first by removing answer and id field)
+    let categories = [];
+    for (var i = 0; i < this.state.local_categories.length; i++) {
+      categories.push(this.state.local_categories[i].name)
+    }
+    database.ref(this.state.room_code).child('local_categories').set(categories);
   }
 
   render() {
     // Can't seem to refactor this into a function
     let AnswerForms =
       <div>
-        {this.state.categories.map((el, index) =>
+        {this.state.local_categories.map((el, index) =>
           <form>
             <label>{el.name}</label><br></br>
             <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)}/>
@@ -198,15 +210,21 @@ class App extends Component {
     const current_state = this.state.current_state
 
     if (current_state === STATES.SIGNED_OUT) {
-      mainDisplay = <LoginButton onClick={this.login} />;
-    } else if (current_state === STATES.CHOOSE_ROOM){
-      mainDisplay = <RoomCodeForm 
+      mainDisplay = <LoginButton
+                      onClick={this.login} />;
+    } else if (current_state === STATES.CHOOSE_NAME) {
+      mainDisplay = <UserNameForm
+                       onSubmit={this.onSubmitUserName}
+                       onChange={this.onChangeUserName} />
+
+    } else if (current_state === STATES.CHOOSE_ROOM) {
+      mainDisplay = <RoomCodeForm
                        onSubmit={this.onSubmitRoomCode}
                        onChange={this.onChangeRoomCode} />
     } else if (current_state === STATES.GAME_LOBBY) {
       // There is only one host
       if (this.state.isHost) {
-        if (this.state.hideNumCategoriesForm == true) {
+        if (this.state.hideNumCategoriesForm === true) {
           mainDisplay = <pre>
                           <StartButton onClick={this.onClickStartButton}/>
                           <br></br>Room Code: {this.state.room_code}
@@ -229,9 +247,13 @@ class App extends Component {
                         # of Users: {this.state.numUsers}
                       </pre>
       }
-    } else if (this.state.categories !== [] &&
+    } else if (this.state.local_categories !== [] &&
                this.state.current_state === STATES.RUN_GAME) {
-            mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
+            mainDisplay = <div>
+                            {AnswerForms}
+                            <SubmitAnswersButton
+                              onClick={this.onClickAnswerSubmission}/>
+                          </div>
     }
 
     return (
@@ -249,6 +271,18 @@ function LoginButton(props) {
       <Button variant="contained" color="primary" onClick={props.onClick}>
         Anonymous Login
       </Button>
+    );
+}
+
+function UserNameForm(props) {
+    return (
+        <form onSubmit={props.onSubmit}>
+          <label>
+            Enter name:
+            <input type="text" onChange={props.onChange}/>
+          </label>
+          <input type="submit" value="Submit"/>
+        </form>
     );
 }
 
@@ -284,22 +318,6 @@ function NumCategoriesForm(props) {
     );
 }
 
-function GenerateCategoryId(index) {
-    // Helper function to generate a category ID using the given index.
-    // The given index should be an integer, and the category ID is a
-    // string with the form 'category-{index}`. For example, `category-13`.
-
-    return `category-${index}`
-}
-
-function GetIndexForCategoryId(id) {
-    // Helper function to find the appropriate item in the category
-    // array using the given category ID. This is a simple implementation
-    // and simply just matches for number after the hyphen (-).
-
-    return id.match(/(?:-)(\d+)$/)[1];
-}
-
 function ConsoleLogCategory(c) {
     // Pretty-print function for category
     console.log(JSON.stringify(c, undefined, 2))
@@ -326,8 +344,8 @@ function GenerateRandomCategories(size) {
     for (var i = 0; i < size; i++) {
         // Choose a random category
         var random_index = Math.floor(Math.random() * possible_categories.length)
-        chosen_categories.push({ 
-            id: GenerateCategoryId(i),
+        chosen_categories.push({
+            id: i,
             name: possible_categories[random_index],
             answer: ""
         })
