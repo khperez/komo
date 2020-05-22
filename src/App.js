@@ -14,8 +14,6 @@ const STATES = {
     SHOW_RESULT:      'show_result'
 }
 
-
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -157,9 +155,23 @@ class App extends Component {
     // button is pressed.
     this.setState({hideNumCategoriesForm: true})
   }
+  
+  generateRoomCode = (length = 4) => {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    console.log(result);
+    this.setState({
+      roomCode: result,
+    });
+  }
 
   onCreate = () => {
     this.login();
+    this.generateRoomCode();
     this.setState({
       isStart: false,
       isHost: true,
@@ -235,7 +247,7 @@ class App extends Component {
         {this.state.isStart 
           && <StartView onCreate={this.onCreate}
                         onJoin={this.onJoin}/>}
-        {this.state.isHost && <HostView onUpdateRoomCode={this.onUpdateRoomCode}/>}
+        {this.state.isHost && <HostView code={this.state.roomCode}/>}
         {this.state.isJoin && <JoinView/>}
         {this.state.isLobby && <LobbyView/>}
       </div>
