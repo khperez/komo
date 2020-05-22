@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { database, auth } from './firebase';
 import Button from '@material-ui/core/Button';
-import BasicTextFields from './components/GameForm';
+import HostView from './components/HostView';
+import StartView from './components/StartView';
+import LobbyView from './components/LobbyView';
+import JoinView from './components/JoinView';
 
 const STATES = {
     SIGNED_OUT:       'signed_out',
@@ -10,25 +13,6 @@ const STATES = {
     RUN_GAME:         'run_game',
     SHOW_RESULT:      'show_result'
 }
-
-const Title = () => (
-  <div className="App-title">
-    Komo
-  </div>
-);
-
-const CreateButton = () => (
-  <div>
-    <Button variant="contained" className="Button-create">Create Game</Button>
-  </div>
-)
-
-const JoinButton = () => (
-  <div>
-    <Button variant="contained">Join Game</Button>
-  </div>
-)
-
 
 
 
@@ -40,10 +24,13 @@ class App extends Component {
       messages: [],
       categories: [], // List of string names (category names)
       current_state: STATES.SIGNED_OUT,
-      room_code: null,
+      roomCode: null,
       numUsers: null,
       isHost: false,
-      hideNumCategoriesForm: false
+      hideNumCategoriesForm: false,
+      isStart: true,
+      isLobby: false,
+      isJoin: false
     };
 
     this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
@@ -87,7 +74,7 @@ class App extends Component {
     var uid = auth.currentUser.uid;
 
     // Add current user to list of players waiting in lobby
-    database.ref(this.state.room_code).child('players').push(uid);
+    database.ref(this.state.roomCode).child('players').push(uid);
     this.setState({current_state: STATES.GAME_LOBBY})
 
     // Listen for players in the same room as us
@@ -100,18 +87,6 @@ class App extends Component {
       alert(`players read failed: ${err.code}`)
     });
 
-    // If we're the first player, take role as host
-    const hostRef = database.ref(this.state.room_code).child('host')
-    hostRef.once('value', snapshot => {
-      // eslint-disable-next-line 
-      if (snapshot.numChildren() == 0) {
-        database.ref(this.state.room_code).child('host').push(uid);
-        this.setState({isHost: true})
-      }
-    }, function(err) {
-      alert(`host read failed: ${err.code}`)
-    });
-
     // Listen for signal to start the game
     const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted')
     isGameStartedRef.on('value', snapshot => {
@@ -120,6 +95,7 @@ class App extends Component {
       // to get the one thing we want.
       snapshot.forEach(childSnapshot => {
           let isGameStarted = childSnapshot.val()
+          // TODO: fix "===" warning
           if (isGameStarted == true) {
              this.setState({current_state: STATES.RUN_GAME})
           }
@@ -130,7 +106,7 @@ class App extends Component {
   }
 
   onChangeRoomCode(event) {
-    this.setState({room_code: event.target.value})
+    this.setState({roomCode: event.target.value})
   }
 
   onChangeAnswer(category_id, event) {
@@ -182,74 +158,89 @@ class App extends Component {
     this.setState({hideNumCategoriesForm: true})
   }
 
-  render() {
-    // Can't seem to refactor this into a function
-    let AnswerForms =
-      <div>
-        {this.state.categories.map((el, index) =>
-          <form>
-            <label>{el.name}</label><br></br>
-            <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)}/>
-          </form>
-        )}
-      </div>
+  onCreate = () => {
+    this.login();
+    this.setState({
+      isStart: false,
+      isHost: true,
+      isLobby: true,
+    });
+  }
 
-    let mainDisplay;
-    const current_state = this.state.current_state
-
-    if (current_state === STATES.SIGNED_OUT) {
-      mainDisplay = <LoginButton onClick={this.login} />;
-    } else if (current_state === STATES.CHOOSE_ROOM){
-      mainDisplay = <RoomCodeForm 
-                       onSubmit={this.onSubmitRoomCode}
-                       onChange={this.onChangeRoomCode} />
-    } else if (current_state === STATES.GAME_LOBBY) {
-      // There is only one host
-      if (this.state.isHost) {
-        if (this.state.hideNumCategoriesForm == true) {
-          mainDisplay = <pre>
-                          <StartButton onClick={this.onClickStartButton}/>
-                          <br></br>Room Code: {this.state.room_code}
-                          <br></br># of Users: {this.state.numUsers}<br></br>
-                        </pre>
-
-        } else {
-          mainDisplay = <pre>
-                          <NumCategoriesForm
-                            onSubmit={this.onSubmitNumCategories}
-                            onChange={this.onChangeNumCategories}/>
-                          <br></br>Room Code: {this.state.room_code}
-                          <br></br># of Users: {this.state.numUsers}<br></br>
-                        </pre>
-        }
-      // Everyone else non-host
-      } else {
-        mainDisplay = <pre>
-                        Room Code: {this.state.room_code}<br></br>
-                        # of Users: {this.state.numUsers}
-                      </pre>
-      }
-    } else if (this.state.categories !== [] &&
-               this.state.current_state === STATES.RUN_GAME) {
-            mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
+  onJoin = () => {
+    if (!auth.currentUser) {
+      this.login();
     }
+    this.setState({
+      isStart: false,
+      isHost: false,
+      isJoin: true
+    });
+  }
+
+  render() {
+    //// Can't seem to refactor this into a function
+    //let AnswerForms =
+    //  <div>
+    //    {this.state.categories.map((el, index) =>
+    //      <form>
+    //        <label>{el.name}</label><br></br>
+    //        <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)}/>
+    //      </form>
+    //    )}
+    //  </div>
+
+    //let mainDisplay = <StartView onAction={this.login}></StartView>
+    //const current_state = this.state.current_state
+
+    //if (current_state === STATES.SIGNED_OUT) {
+    //  mainDisplay = <LoginButton onClick={this.login} />;
+    //} else if (current_state === STATES.CHOOSE_ROOM){
+    //  mainDisplay = <RoomCodeForm 
+    //                   onSubmit={this.onSubmitRoomCode}
+    //                   onChange={this.onChangeRoomCode} />
+    //} else if (current_state === STATES.GAME_LOBBY) {
+    //  // There is only one host
+    //  if (this.state.isHost) {
+    //    if (this.state.hideNumCategoriesForm == true) {
+    //      mainDisplay = <pre>
+    //                      <StartButton onClick={this.onClickStartButton}/>
+    //                      <br></br>Room Code: {this.state.room_code}
+    //                      <br></br># of Users: {this.state.numUsers}<br></br>
+    //                    </pre>
+
+    //    } else {
+    //      mainDisplay = <pre>
+    //                      <NumCategoriesForm
+    //                        onSubmit={this.onSubmitNumCategories}
+    //                        onChange={this.onChangeNumCategories}/>
+    //                      <br></br>Room Code: {this.state.room_code}
+    //                      <br></br># of Users: {this.state.numUsers}<br></br>
+    //                    </pre>
+    //    }
+    //  // Everyone else non-host
+    //  } else {
+    //    mainDisplay = <pre>
+    //                    Room Code: {this.state.room_code}<br></br>
+    //                    # of Users: {this.state.numUsers}
+    //                  </pre>
+    //  }
+    //} else if (this.state.categories !== [] &&
+    //           this.state.current_state === STATES.RUN_GAME) {
+    //        mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
+    //}
 
     return (
       <div className="App">
-        <Title />
-        <GameActions />
-        <BasicTextFields />
+        {this.state.isStart 
+          && <StartView onCreate={this.onCreate}
+                        onJoin={this.onJoin}/>}
+        {this.state.isHost && <HostView onUpdateRoomCode={this.onUpdateRoomCode}/>}
+        {this.state.isJoin && <JoinView/>}
+        {this.state.isLobby && <LobbyView/>}
       </div>
     );
   } 
-}
-
-function LoginButton(props) {
-    return (
-      <Button variant="contained" color="primary" onClick={props.onClick}>
-        Anonymous Login
-      </Button>
-    );
 }
 
 function RoomCodeForm(props) {
@@ -261,14 +252,6 @@ function RoomCodeForm(props) {
           </label>
           <input type="submit" value="Submit"/>
         </form>
-    );
-}
-
-function StartButton(props) {
-    return (
-      <Button variant="contained" color="secondary" onClick={props.onClick}>
-        Start Game!
-      </Button>
     );
 }
 

@@ -2,15 +2,18 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: space-around;
   flex-direction: column;
+  justify-content: center;
+  overflow: auto;
+  font-family: 'Roboto', sans-serif;
 }
 
 .App-title {
   display: flex;
   font-family: 'Catamaran', sans-serif;
-  color: blue;
+  color: #EC4E20;
   margin: 0px 5px;
+  font-size: 20vh;
 }
 
 .Button-create{
@@ -29,7 +32,39 @@
 .Game-start-actions {
   display: flex;
   min-height: 30vh;
+}
+
+.Host-view {
+  display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Join-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.Room-code-main {
+  display: flex;
   align-items: center;
   justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.Room-code-title {
+  font-size: 3vh;
+}
+
+.Room-code-host{
+  font-size: 4vh;
+}
+
+.Room-code-id {
+  color: #EC4E20;
+  margin: 0px 5px;
+  font-size: 10vh;
 }

@@ -10,24 +10,33 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const CreateButton = () => (
-    <div>
-      <Button variant="contained" className="Button-create">Create Game</Button>
-    </div>
-)
-  
-const JoinButton = () => (
-    <div>
-        <Button variant="contained">Join Game</Button>
-    </div>
-)
+function CreateButton({ onCreate }) {
+    return (
+      <Button variant="contained" onClick={ onCreate }>Create Game</Button>
+    )
+}
 
-export default function GameActions() {
+function StartButton(props) {
+    return (
+      <Button variant="contained" color="secondary" onClick={props.onClick}>
+        Start Game!
+      </Button>
+    );
+}
+  
+function JoinButton({ onJoin }) {
+    return (
+        <Button variant="contained" onClick={ onJoin }>Join Game</Button>
+    )
+}
+
+export default function GameActions({ onCreate, onJoin }) {
     const classes = useStyles();
+
     return (
         <div className={classes.root}>
-            <CreateButton />
-            <JoinButton />
+            <CreateButton onCreate={onCreate}/>
+            <JoinButton onJoin={onJoin}/>
         </div>
     )
 }
