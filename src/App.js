@@ -5,6 +5,8 @@ import HostView from './components/HostView';
 import StartView from './components/StartView';
 import LobbyView from './components/LobbyView';
 import JoinView from './components/JoinView';
+import GameView from './components/GameView';
+import AdminView from './components/AdminView';
 
 const STATES = {
     SIGNED_OUT:       'signed_out',
@@ -28,7 +30,9 @@ class App extends Component {
       hideNumCategoriesForm: false,
       isStart: true,
       isLobby: false,
-      isJoin: false
+      isJoin: false,
+      isGameRunning: false,
+      currentUser: null
     };
 
     this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
@@ -37,8 +41,6 @@ class App extends Component {
     this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
     this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
     this.onChangeAnswer = this.onChangeAnswer.bind(this);
-    this.onClickStartButton = this.onClickStartButton.bind(this);
-    this.login = () => { auth.signInAnonymously() };
   }
 
   componentDidMount() {
@@ -48,22 +50,19 @@ class App extends Component {
 
     auth.onAuthStateChanged((user) => {
       if (user) {
-        const messagesRef = database.ref(user.uid)
-          .orderByKey()
-          .limitToLast(100);
-
-        messagesRef.on('child_added', snapshot => {
-          const message = { text: snapshot.val(), id: snapshot.key };
-
-          this.setState(prevState => ({
-            messages: [ message, ...prevState.messages ],
-          }));
+        this.setState({
+          currentUser: user.uid,
         });
-        this.setState({current_state: STATES.CHOOSE_ROOM})
-      } else {
-        this.setState({current_state: STATES.SIGNED_OUT})
+        database.ref(this.state.roomCode).child('players').push(this.state.currentUser);
       }
-    })
+      if (this.state.numUsers) {
+        database.ref(this.state.roomCode).child('host').push(this.state.currentUser);
+      }
+      let numUsers = this.state.numUsers+1;
+      this.setState({
+        numUsers: numUsers,
+      })
+    });
   }
 
   onSubmitRoomCode(event) {
@@ -75,15 +74,6 @@ class App extends Component {
     database.ref(this.state.roomCode).child('players').push(uid);
     this.setState({current_state: STATES.GAME_LOBBY})
 
-    // Listen for players in the same room as us
-    const playersRef = database.ref(this.state.room_code).child('players')
-      .orderByKey()
-      .limitToLast(100);
-    playersRef.on('value', snapshot => {
-      this.setState({ numUsers: snapshot.numChildren() })
-    }, function(err) {
-      alert(`players read failed: ${err.code}`)
-    });
 
     // Listen for signal to start the game
     const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted')
@@ -123,14 +113,6 @@ class App extends Component {
     }
   }
 
-  onClickStartButton = () => {
-    // Notify non-host players that the game is starting
-    database.ref(this.state.roomCode).child('isGameStarted').push(true);
-    // TODO: I think this line can be removed actually becaues we can have
-    // the host listening for the start signal uisng isGameStartedRef
-    this.setState({current_state: STATES.RUN_GAME})
-  }
-
   onClickAnswerSubmission(event) {
     event.preventDefault();
 
@@ -155,6 +137,10 @@ class App extends Component {
     // button is pressed.
     this.setState({hideNumCategoriesForm: true})
   }
+
+  login = () => {
+    auth.signInAnonymously();
+  }
   
   generateRoomCode = (length = 4) => {
     var result           = '';
@@ -169,7 +155,7 @@ class App extends Component {
     });
   }
 
-  onCreate = () => {
+  createGame = () => {
     this.login();
     this.generateRoomCode();
     this.setState({
@@ -179,15 +165,27 @@ class App extends Component {
     });
   }
 
-  onJoin = () => {
-    if (!auth.currentUser) {
-      this.login();
-    }
+  joinGame = () => {
+    this.login();
     this.setState({
       isStart: false,
       isHost: false,
       isJoin: true
     });
+  }
+
+  startGame = () => {
+    console.log("Game START");
+    // Notify non-host players that the game is starting
+    database.ref(this.state.roomCode).child('isGameStarted').push(true);
+    // TODO: I think this line can be removed actually becaues we can have
+    // the host listening for the start signal uisng isGameStartedRef
+    this.setState({
+      isGameRunning: true,
+      isHost: false,
+      isJoin: false,
+      isLobby: false
+    })
   }
 
   render() {
@@ -245,12 +243,14 @@ class App extends Component {
     return (
       <div className="App">
         {this.state.isStart 
-          && <StartView onCreate={this.onCreate}
-                        onJoin={this.onJoin}/>}
+          && <StartView onCreate={this.createGame}
+                        onJoin={this.joinGame}/>}
         {this.state.isHost && <HostView code={this.state.roomCode}
-                                        onClick={this.onClickStartButton}/>}
+                                        onClick={this.startGame}/>}
         {this.state.isJoin && <JoinView/>}
         {this.state.isLobby && <LobbyView/>}
+        {this.state.isGameRunning && <GameView/>}
+        <AdminView></AdminView>
       </div>
     );
   } 
