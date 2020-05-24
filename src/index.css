@@ -55,10 +55,6 @@
   flex-direction: column;
 }
 
-.Room-code-title {
-  font-size: 3vh;
-}
-
 .Room-code-host{
   font-size: 4vh;
 }
@@ -66,5 +62,5 @@
 .Room-code-id {
   color: #EC4E20;
   margin: 0px 5px;
-  font-size: 10vh;
+  font-size: 9vh;
 }

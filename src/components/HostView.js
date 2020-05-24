@@ -1,34 +1,48 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
 
-function StartButton({onClick}) {
-  return (
-    <Button variant="contained" color="secondary" onClick={onClick}>
-      Start Game!
-    </Button>
-  );
-}
-
-function RoomCode({ code, onClick }) {
+function RoomCode({ code }) {
   return (
     <div className="Room-code-main">
-      <div className="Room-code-host">You are the host</div>
       <div className="Room-code-content">
         <span className="Room-code-title">Room Code: </span>
         <span className="Room-code-id">{code}</span>
-      </div>
-      <div>
-        <StartButton onClick={onClick}/>
       </div>
     </div>
   );
 }
 
-export default function HostView({ code , onClick }) {
+function NumCategoriesForm({changeHandler, submitHandler}) {
+  return (
+      <form onSubmit={submitHandler} autoComplete="off">
+        <TextField onChange={changeHandler} 
+          id="outlined-basic"
+          label="number of categories"
+          variant="outlined"
+          name="numCategories"/>
+        <p>
+        <Button type="submit" label="login" variant="contained">
+          Start Game
+        </Button>
+        </p>
+      </form>
+  );
+}
+
+export default function HostView (
+  { code, 
+    changeHandler,
+    submitHandler 
+  }) {
   return (
     <div>
-      <RoomCode code={code} 
-                onClick={onClick}/>
+      <div className="Room-code-host">You are the host</div>
+      <RoomCode code={code}/>
+      <h1>Game Settings</h1>
+      <NumCategoriesForm
+        changeHandler={changeHandler}
+        submitHandler={submitHandler}/>
     </div>
   );
 }

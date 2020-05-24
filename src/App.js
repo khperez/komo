@@ -8,43 +8,26 @@ import JoinView from './components/JoinView';
 import GameView from './components/GameView';
 import AdminView from './components/AdminView';
 
-const STATES = {
-    SIGNED_OUT:  'signed_out',
-    CHOOSE_NAME: 'choose_name',
-    CHOOSE_ROOM: 'choose_room',
-    GAME_LOBBY:  'game_lobby',
-    RUN_GAME:    'run_game',
-    SHOW_RESULT: 'show_result'
-}
-
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      messages: [],
-      local_categories: [],
-      current_state: STATES.SIGNED_OUT,
+      categoriesList: [],
       roomCode: null,
-      numUsers: null,
+      numPlayers: 0,
       isHost: false,
-      hideNumCategoriesForm: false,
-      isStart: true,
-      isLobby: false,
-      isJoin: false,
-      isGameRunning: false,
+      isHostView: false,
+      isStartView: true,
+      isLobbyView: false,
+      isJoinView: false,
+      isGameView: false,
       currentUser: null,
-      user_name: ''
+      username: null,
+      isValidRoom: null,
+      numCategories: 0,
+      players: [],
     };
-
-    this.onSubmitUserName = this.onSubmitUserName.bind(this);
-    this.onChangeUserName = this.onChangeUserName.bind(this);
-    this.onSubmitRoomCode = this.onSubmitRoomCode.bind(this);
-    this.onChangeRoomCode = this.onChangeRoomCode.bind(this);
-    this.onClickAnswerSubmission = this.onClickAnswerSubmission.bind(this);
-    this.onChangeNumCategories = this.onChangeNumCategories.bind(this);
-    this.onSubmitNumCategories = this.onSubmitNumCategories.bind(this);
-    this.onChangeAnswer = this.onChangeAnswer.bind(this);
   }
 
   componentDidMount() {
@@ -54,98 +37,32 @@ class App extends Component {
 
     auth.onAuthStateChanged((user) => {
       if (user) {
+        console.log("setting current user");
         this.setState({
           currentUser: user.uid,
+          numPlayers: this.state.numPlayers + 1, 
         });
-        database.ref(this.state.roomCode).child('players').push(this.state.currentUser);
-      }
-      if (this.state.numUsers) {
-        database.ref(this.state.roomCode).child('host').push(this.state.currentUser);
-      }
-      let numUsers = this.state.numUsers+1;
-      this.setState({
-        numUsers: numUsers,
-      })
-    });
-  }
-
-  onChangeUserName(event) {
-    this.setState({user_name: event.target.value})
-  }
-
-  onSubmitUserName(event) {
-    event.preventDefault();
-    this.setState({current_state: STATES.CHOOSE_ROOM})
-  }
-
-  onSubmitRoomCode(event) {
-    event.preventDefault();
-
-    var uid = auth.currentUser.uid;
-
-    // Add current user to list of players waiting in lobby
-    database.ref(this.state.roomCode).child('players').push(uid);
-    this.setState({current_state: STATES.GAME_LOBBY})
-
-    // Write user name to database (We couldn't do this earlier because we did not
-    // have a room code yet)
-    var name = this.state.user_name
-    database.ref(this.state.room_code).child('players').child(uid).child('name').set(name);
-
-    // Decide if we're a host or not
-    const hostRef = database.ref(this.state.room_code).child('host')
-    hostRef.once('value', snapshot => {
-      if (!snapshot.exists()) {
-        database.ref(this.state.room_code).child('host').set(uid);
-        this.setState({isHost: true})
-      } else {
-        const categoriesRef = database.ref(this.state.room_code).child('local_categories')
-        categoriesRef.on('value', snapshot => {
-          if (snapshot.exists()) {
-            let categories = []
-            for (var i = 0; i < snapshot.val().length; i++) {
-              categories.push({
-                id: i,
-                name: snapshot.val()[i],
-                answer: ""
-              })
-            }
-            this.setState({local_categories: categories})
+        if (this.state.roomCode) {
+          console.log("[database] set roomCode")
+          //database.ref(this.state.roomCode).child('players').push(this.state.currentUser);
+          database.ref(this.state.roomCode).child('numPlayers')
+            .set(this.state.numPlayers);
+          if (this.state.numPlayers === 1) {
+            console.log("setting host");
+            this.setState({
+              isHost: true,
+            })
+            database.ref(this.state.roomCode).child('host').set(this.state.currentUser);
+            database.ref(this.state.roomCode).child('players').child(this.state.currentUser).child('name').set(this.state.username);
           }
-        }, function(err) {
-          alert(`isGameStart read failed: ${err.code}`)
-        });
+        }
       }
-    }, function(err) {
-      alert(`host read failed: ${err.code}`)
     });
-
-    // Listen for players in the same room as us
-    const playersRef = database.ref(this.state.room_code).child('players')
-      .orderByKey()
-      .limitToLast(100);
-    playersRef.on('value', snapshot => {
-      this.setState({ numUsers: snapshot.numChildren() })
-    }, function(err) {
-      alert(`players read failed: ${err.code}`)
-    });
-
-    // Listen for signal to start the game
-    const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted')
-    isGameStartedRef.on('value', snapshot => {
-      if (snapshot.val() === true) {
-         this.setState({current_state: STATES.RUN_GAME})
-      }
-    }, function(err) {
-      alert(`isGameStart read failed: ${err.code}`)
-    });
-
-    // Time to wait in lobby
-    this.setState({current_state: STATES.GAME_LOBBY})
   }
 
-  onChangeRoomCode(event) {
-    this.setState({roomCode: event.target.value})
+  addPlayer = () => {
+    var uid = auth.currentUser.uid;
+    database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
   }
 
   onChangeAnswer(category_id, event) {
@@ -154,23 +71,6 @@ class App extends Component {
     const new_categories = this.state.local_categories // copy the array
     new_categories[category_id].answer = event.target.value; // manipulate data
     this.setState({loca_categories: new_categories}) // set the new state
-  }
-
-  onClickStartButton(event) {
-    // Notify non-host players that the game is starting
-    database.ref(this.state.room_code).child('isGameStarted').set(true);
-  }
-
-  onClickAnswerSubmission(event) {
-    event.preventDefault();
-
-    // Push the user-provided answers to the database
-    let answers = []
-    for (var i = 0; i < this.state.local_categories.length; i++) {
-      answers.push(this.state.local_categories[i].answer)
-    }
-    let uid = auth.currentUser.uid;
-    database.ref(this.state.room_code).child('players').child(uid).child('answers').set(answers);
   }
 
   onChangeNumCategories(event) {
@@ -205,6 +105,7 @@ class App extends Component {
        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     console.log(result);
+    result = "XXXX";
     this.setState({
       roomCode: result,
     });
@@ -214,145 +115,160 @@ class App extends Component {
     this.login();
     this.generateRoomCode();
     this.setState({
-      isStart: false,
-      isHost: true,
-      isLobby: true,
+      isStartView: false,
+      isLobbyView: true,
+      isHostView: true,
     });
   }
 
   joinGame = () => {
     this.login();
     this.setState({
-      isStart: false,
-      isHost: false,
-      isJoin: true
+      isStartView: false,
+      isHostView: false,
+      isJoinView: true
     });
+  }
+
+  setLobbyView = () => {
+    console.log(this.state.players);
+    this.setState({
+      isLobbyView: true,
+    });
+  }
+
+  updateLobbyPlayers = () => {
+    const playersRef = database.ref(this.state.roomCode).child('players');
+    playersRef.on('value', snapshot => {
+      const playerList = [];
+      snapshot.forEach(function(data) {
+        playerList.push(data.val().name);
+      });
+      this.setState({
+        players: playerList
+      }, this.setLobbyView);
+    }, function(err) {
+      alert(`players read failed: ${err.code}`)
+    });
+  }
+
+  joinLobby = () => {
+    console.log("Join Lobby");
+    this.addPlayer();
+    this.updateLobbyPlayers();
+  }
+
+  setCategories = () => {
+    if (this.state.isHost) {
+      console.log("pushing categories to server");
+      let categories = this.state.categoriesList.map(category => category.name);
+      database.ref(this.state.roomCode).child('categories').set(categories);
+    }
   }
 
   startGame = () => {
     console.log("Game START");
     // Notify non-host players that the game is starting
-    database.ref(this.state.roomCode).child('isGameStarted').push(true);
+    database.ref(this.state.roomCode).child('isGameStarted').set(true);
     // TODO: I think this line can be removed actually becaues we can have
     // the host listening for the start signal uisng isGameStartedRef
+    console.log("Number of categories: " + this.state.numCategories);
     this.setState({
-      isGameRunning: true,
-      isHost: false,
-      isJoin: false,
-      isLobby: false
+      isGameView: true,
+      isHostView: false,
+      isJoinView: false,
+      isLobbyView: false
     })
   }
 
+  changeHandler = (event) => {
+    let name = event.target.name;
+    let val = event.target.value;
+    this.setState({
+      [name]: val
+    });
+  }
+
+  setValidRoom = (value) => {
+    this.setState({
+      isValidRoom: value,
+    })
+    if (this.state.isValidRoom === true) {
+      this.setState({
+        isJoinView: false,
+        isLobbyView: true,
+      });
+    }
+  }
+
+  submitHandler = (event) => {
+    event.preventDefault();
+    console.log("submitHandler called");
+    database.ref(this.state.roomCode).once('value').then((snapshot) => {
+      if (snapshot.val() !== null) {
+        console.log("this is a valid room");
+        this.setValidRoom(true);
+      } else {
+        alert("This is not a valid room. Please try again");
+        this.setValidRoom(false);
+      }
+    });
+    this.joinLobby();
+  }
+
+  submitHostFormHandler = (event) => {
+    event.preventDefault();
+    console.log("setting categories locally");
+    this.setState({
+      categoriesList: GenerateRandomCategories(this.state.numCategories)
+    },
+      this.setCategories
+    );
+    this.startGame();
+  }
+
   render() {
-    //// Can't seem to refactor this into a function
-    //let AnswerForms =
-    //  <div>
-    //    {this.state.categories.map((el, index) =>
-    //      <form>
-    //        <label>{el.name}</label><br></br>
-    //        <input type="text" onChange={this.onChangeAnswer.bind(this, el.id)}/>
-    //      </form>
-    //    )}
-    //  </div>
-
-    //let mainDisplay = <StartView onAction={this.login}></StartView>
-    //const current_state = this.state.current_state
-
-    //if (current_state === STATES.SIGNED_OUT) {
-    //  mainDisplay = <LoginButton onClick={this.login} />;
-    //} else if (current_state === STATES.CHOOSE_ROOM){
-    //  mainDisplay = <RoomCodeForm 
-    //                   onSubmit={this.onSubmitRoomCode}
-    //                   onChange={this.onChangeRoomCode} />
-    //} else if (current_state === STATES.GAME_LOBBY) {
-    //  // There is only one host
-    //  if (this.state.isHost) {
-    //    if (this.state.hideNumCategoriesForm == true) {
-    //      mainDisplay = <pre>
-    //                      <StartButton onClick={this.onClickStartButton}/>
-    //                      <br></br>Room Code: {this.state.room_code}
-    //                      <br></br># of Users: {this.state.numUsers}<br></br>
-    //                    </pre>
-
-    //    } else {
-    //      mainDisplay = <pre>
-    //                      <NumCategoriesForm
-    //                        onSubmit={this.onSubmitNumCategories}
-    //                        onChange={this.onChangeNumCategories}/>
-    //                      <br></br>Room Code: {this.state.room_code}
-    //                      <br></br># of Users: {this.state.numUsers}<br></br>
-    //                    </pre>
-    //    }
-    //  // Everyone else non-host
-    //  } else {
-    //    mainDisplay = <pre>
-    //                    Room Code: {this.state.room_code}<br></br>
-    //                    # of Users: {this.state.numUsers}
-    //                  </pre>
-    //  }
-    //} else if (this.state.categories !== [] &&
-    //           this.state.current_state === STATES.RUN_GAME) {
-    //        mainDisplay = <div>{AnswerForms}<SubmitAnswersButton onClick={this.onClickAnswerSubmission} /></div>
-    //}
-
     return (
       <div className="App">
-        {this.state.isStart 
-          && <StartView onCreate={this.createGame}
-                        onJoin={this.joinGame}/>}
-        {this.state.isHost && <HostView code={this.state.roomCode}
-                                        onClick={this.startGame}/>}
-        {this.state.isJoin && <JoinView/>}
-        {this.state.isLobby && <LobbyView/>}
-        {this.state.isGameRunning && <GameView/>}
+        {this.state.isStartView 
+          && 
+          <StartView
+            onCreate={this.createGame}
+            onJoin={this.joinGame}
+          />
+        }
+        {this.state.isJoinView
+          && 
+          <JoinView 
+            changeHandler={this.changeHandler}
+            submitHandler={this.submitHandler}
+            validRoom={this.state.validRoom}
+          />
+         }
+        {this.state.isHostView
+          &&
+          <HostView code={this.state.roomCode}
+            onClick={this.startGame}
+            changeHandler={this.changeHandler}
+            submitHandler={this.submitHostFormHandler}
+          />
+        }
+        {this.state.isLobbyView
+          && 
+          <LobbyView 
+            players={this.state.players}
+          />
+        }
+        {this.state.isGameView
+          && 
+          <GameView
+            categories={this.state.categoriesList}
+          />
+        }
         <AdminView></AdminView>
       </div>
     );
   } 
-}
-
-function LoginButton(props) {
-    return (
-      <Button variant="contained" color="primary" onClick={props.onClick}>
-        Anonymous Login
-      </Button>
-    );
-}
-
-function UserNameForm(props) {
-    return (
-        <form onSubmit={props.onSubmit}>
-          <label>
-            Enter name:
-            <input type="text" onChange={props.onChange}/>
-          </label>
-          <input type="submit" value="Submit"/>
-        </form>
-    );
-}
-
-function RoomCodeForm(props) {
-    return (
-        <form onSubmit={props.onSubmit}>
-          <label>
-            Enter room code:
-            <input type="text" onChange={props.onChange}/>
-          </label>
-          <input type="submit" value="Submit"/>
-        </form>
-    );
-}
-
-function NumCategoriesForm(props) {
-    return (
-        <form onSubmit={props.onSubmit}>
-          <label>
-            Number of Categories:
-            <input type="text" onChange={props.onChange}/>
-          </label>
-          <input type="submit" value="Submit"/>
-        </form>
-    );
 }
 
 function ConsoleLogCategory(c) {
@@ -396,14 +312,6 @@ function GenerateRandomCategories(size) {
     }
 
     return chosen_categories;
-}
-
-function SubmitAnswersButton(props) {
-    return (
-      <Button variant="contained" color="primary" onClick={props.onClick}>
-        Submit Answers
-      </Button>
-    );
 }
 
 export default App;

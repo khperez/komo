@@ -1,13 +1,13 @@
 import React from 'react';
-import TextField from '@material-ui/core/TextField';
-import { JoinButton } from './GameActions';
+import JoinLobbyForm from './forms/JoinLobbyForm';
 
-export default function JoinView() {
+export default function JoinView({changeHandler, submitHandler, validRoom}) {
   return (
     <div className="Join-view">
-      <TextField id="outlined-basic" label="room code" variant="outlined" />
-      <TextField id="outlined-basic" label="username" variant="outlined" />
-      <JoinButton />
+      <JoinLobbyForm
+        changeHandler={changeHandler} 
+        submitHandler={submitHandler}
+        validRoom={validRoom}/>
     </div>
   );
 }
