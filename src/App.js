@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { database, auth } from './firebase';
-import Button from '@material-ui/core/Button';
 import HostView from './components/HostView';
 import StartView from './components/StartView';
 import LobbyView from './components/LobbyView';
 import JoinView from './components/JoinView';
 import GameView from './components/GameView';
 import AdminView from './components/AdminView';
+import HostJoinForm from './components/forms/HostJoinForm';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 class App extends Component {
   constructor(props) {
@@ -27,6 +30,7 @@ class App extends Component {
       isValidRoom: null,
       numCategories: 0,
       players: [],
+      modalShow: false,
     };
   }
 
@@ -115,9 +119,10 @@ class App extends Component {
     this.login();
     this.generateRoomCode();
     this.setState({
-      isStartView: false,
-      isLobbyView: true,
-      isHostView: true,
+      //isStartView: false,
+      //isLobbyView: true,
+      //isHostView: true,
+      modalShow: true,
     });
   }
 
@@ -184,6 +189,9 @@ class App extends Component {
   changeHandler = (event) => {
     let name = event.target.name;
     let val = event.target.value;
+    if (name === "roomCode") {
+      val = val.toUpperCase();
+    }
     this.setState({
       [name]: val
     });
@@ -227,6 +235,24 @@ class App extends Component {
     this.startGame();
   }
 
+  setModalShow = (value) => {
+    this.setState({
+      modalShow: value,
+    });
+  }
+
+  submitHostName = () => {
+    this.setModalShow(false);
+    this.addPlayer();
+    console.log("submitting host username: " + this.state.username);
+    this.setState({
+      isStartView: false,
+      isLobbyView: true,
+      isHostView: true,
+    });
+    this.updateLobbyPlayers();
+  };
+
   render() {
     return (
       <div className="App">
@@ -257,6 +283,7 @@ class App extends Component {
           && 
           <LobbyView 
             players={this.state.players}
+            roomCode={this.state.roomCode}
           />
         }
         {this.state.isGameView
@@ -266,6 +293,11 @@ class App extends Component {
           />
         }
         <AdminView></AdminView>
+        <HostJoinForm
+          show={this.state.modalShow}
+          onSubmit={this.submitHostName}
+          onChange={this.changeHandler}
+        />
       </div>
     );
   } 
