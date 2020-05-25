@@ -36,6 +36,35 @@ class App extends Component {
     };
   }
 
+  setHostDatabase = () => {
+    database.ref(this.state.roomCode)
+      .child('host')
+      .set(this.state.currentUser);
+    database.ref(this.state.roomCode)
+      .child('players')
+      .child(this.state.currentUser)
+      .child('name')
+      .set(this.state.username);
+    this.setState({
+      modalShow: true,
+    })
+  }
+
+  setNumPlayersDatabase = () => {
+    database.ref(this.state.roomCode).child('numPlayers').set(this.state.numPlayers);
+    console.log("numPlayers: " + this.state.numPlayers);
+    if (this.state.numPlayers === 1) {
+      console.log("setting host");
+      this.setState({
+        isHost: true,
+      }, this.setHostDatabase);
+    } else {
+      this.setState({
+        modalShow: true,
+      })
+    }
+  }
+
   componentDidMount() {
     // Sign out by default for now so we can test the 'Anonymous Login' button.
     // TODO: Probably should remove this in production TM.
@@ -44,31 +73,24 @@ class App extends Component {
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log("setting current user");
-        var numPlayers = this.state.numPlayers + 1
         this.setState({
           currentUser: user.uid,
-          numPlayers: numPlayers,
         });
         if (this.state.roomCode) {
           console.log("[database] set roomCode")
           database.ref(this.state.roomCode)
             .child('numPlayers')
-            .set(numPlayers);
-          if (numPlayers === 1) {
-            console.log("setting host");
-            this.setState({
-              isHost: true,
-              modalShow: true,
-            });
-            database.ref(this.state.roomCode)
-              .child('host')
-              .set(user.uid);
-            database.ref(this.state.roomCode)
-              .child('players')
-              .child(user.uid)
-              .child('name')
-              .set(this.state.username);
-          } 
+            .once('value').then((snapshot) => {
+              let players = 0;
+              if (!snapshot.val()) {
+                players = 1;
+              } else {
+                players = snapshot.val() + 1;
+              }
+              this.setState({
+                numPlayers: players,
+              },this.setNumPlayersDatabase); 
+          })
         } else {
           this.setState({
             modalShow: true,
@@ -273,16 +295,65 @@ class App extends Component {
       modalShow: value,
     });
   }
+ 
+  showGameView = () => {
+    database.ref(this.state.roomCode)
+      .child('categoryLetter')
+      .once('value').then((snapshot) => {
+        if (snapshot.val() !== null) {
+          this.setState({
+            categoryLetter: snapshot.val()
+          })
+        }
+      })
+    database.ref(this.state.roomCode).child('categories')
+      .on('value', snapshot => {
+        if (snapshot.exists()) {
+          let categories = []
+          for (var i = 0; i < snapshot.val().length; i++) {
+            categories.push({
+              id: i,
+              name: snapshot.val()[i],
+              answer: ""
+            })
+          }
+          this.setState({categoriesList: categories})
+        }
+      }, function(err) {
+        alert(`isGameStart read failed: ${err.code}`)
+      });
+    this.setState({
+      isGameView: true,
+      isLobbyView: false,
+    });
+  }
 
-  submitHostName = () => {
+  waitForGameStart = () => {
+    console.log("wait for game start");
+    database.ref(this.state.roomCode).child('isGameStarted')
+      .on('value', (snapshot) => {
+        if (snapshot.val() === true) {
+          this.showGameView();
+        }
+      });
+  }
+
+  submitName = () => {
     this.setModalShow(false);
     this.addPlayer();
-    console.log("submitting host username: " + this.state.username);
-    this.setState({
-      isStartView: false,
-      isLobbyView: true,
-      isHostView: true,
-    });
+    if (this.state.isHost) {
+      this.setState({
+        isStartView: false,
+        isLobbyView: true,
+        isHostView: true,
+      });
+    } else {
+      this.setState({
+        isStartView: false,
+        isLobbyView: true,
+        isHostView: false,
+      }, this.waitForGameStart);
+    }
     this.updateLobbyPlayers();
   };
 
@@ -359,7 +430,7 @@ class App extends Component {
         <JoinForm
           show={this.state.modalShow}
           onHide={() => this.setState({modalShow: false})}
-          onSubmit={this.submitHostName}
+          onSubmit={this.submitName}
           onChange={this.changeHandler}
           host={this.state.isHost.toString()}
         />
