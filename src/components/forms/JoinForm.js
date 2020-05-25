@@ -2,10 +2,12 @@ import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import FormGroup from 'react-bootstrap/FormGroup'
+import FormGroup from 'react-bootstrap/FormGroup';
 
-export default function JoinLobbyForm(props) {
+export default function JoinForm(props) {
+  console.log(props.host);
   return (
+    <div>
       <Modal
         {...props}
         size="lg"
@@ -19,19 +21,28 @@ export default function JoinLobbyForm(props) {
         </Modal.Header>
         <Modal.Body>
           <Form onChange={props.onChange}>
-            <FormGroup>
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                type="username"
-                placeholder="Enter username"
-                name="username"
-              />
-            </FormGroup>
+              {props.host==="false" &&
+              <FormGroup>
+                <Form.Label>Room Code</Form.Label>
+                <Form.Control
+                  placeholder="Enter room code"
+                  name="roomCode"
+                />
+              </FormGroup>
+              }
+              <FormGroup>
+                <Form.Label>Username</Form.Label>
+                <Form.Control
+                  placeholder="Enter room code"
+                  name="username"
+                />
+              </FormGroup>
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={props.onSubmit}>Submit</Button>
         </Modal.Footer>
       </Modal>
-    );
+    </div>
+  );
 }

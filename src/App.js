@@ -7,9 +7,9 @@ import LobbyView from './components/LobbyView';
 import JoinView from './components/JoinView';
 import GameView from './components/GameView';
 import AdminView from './components/AdminView';
-import HostJoinForm from './components/forms/HostJoinForm';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import JoinForm from './components/forms/JoinForm';
 
 class App extends Component {
   constructor(props) {
@@ -48,17 +48,27 @@ class App extends Component {
         });
         if (this.state.roomCode) {
           console.log("[database] set roomCode")
-          //database.ref(this.state.roomCode).child('players').push(this.state.currentUser);
           database.ref(this.state.roomCode).child('numPlayers')
             .set(this.state.numPlayers);
           if (this.state.numPlayers === 1) {
             console.log("setting host");
             this.setState({
               isHost: true,
-            })
-            database.ref(this.state.roomCode).child('host').set(this.state.currentUser);
-            database.ref(this.state.roomCode).child('players').child(this.state.currentUser).child('name').set(this.state.username);
-          }
+              modalShow: true,
+            });
+            database.ref(this.state.roomCode)
+              .child('host')
+              .set(user.uid);
+            database.ref(this.state.roomCode)
+              .child('players')
+              .child(user.uid)
+              .child('name')
+              .set(this.state.username);
+          } 
+        } else {
+          this.setState({
+            modalShow: true,
+          })
         }
       }
     });
@@ -122,17 +132,12 @@ class App extends Component {
       //isStartView: false,
       //isLobbyView: true,
       //isHostView: true,
-      modalShow: true,
+      // modalShow: true,
     });
   }
 
   joinGame = () => {
     this.login();
-    this.setState({
-      isStartView: false,
-      isHostView: false,
-      isJoinView: true
-    });
   }
 
   setLobbyView = () => {
@@ -292,11 +297,12 @@ class App extends Component {
             categories={this.state.categoriesList}
           />
         }
-        <AdminView></AdminView>
-        <HostJoinForm
+        <JoinForm
           show={this.state.modalShow}
+          onHide={() => this.setState({modalShow: false})}
           onSubmit={this.submitHostName}
           onChange={this.changeHandler}
+          host={this.state.isHost.toString()}
         />
       </div>
     );
