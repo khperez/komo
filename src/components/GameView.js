@@ -1,13 +1,19 @@
 import React from 'react';
+import Form from 'react-bootstrap/Form';
 
-export default function GameView({categories}) {
+export default function GameView({categories, onChange}) {
     const categoryList = categories.map((category) =>
-        <li key={category.id}>{category.name}</li>
+        <Form.Group>
+            <Form.Label>{category.name}</Form.Label>
+            <Form.Control/>
+        </Form.Group>
     );
     return (
         <div>
             <h1>Game View</h1>
-            {categoryList}
+            <Form onChange={onChange}>
+                {categoryList}
+            </Form>
         </div>
     )
 }

@@ -42,7 +42,7 @@ class App extends Component {
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log("setting current user");
-        numPlayers = this.state.numPlayers + 1
+        var numPlayers = this.state.numPlayers + 1
         this.setState({
           currentUser: user.uid,
           numPlayers: numPlayers,
@@ -81,7 +81,7 @@ class App extends Component {
     database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
   }
 
-  onChangeAnswer(category_id, event) {
+  onChangeAnswer = (category_id, event) => {
     // Preferred way to modify an element in a state array:
     // https://stackoverflow.com/a/42037439/6606953
     const new_categories = this.state.local_categories // copy the array
@@ -297,6 +297,7 @@ class App extends Component {
           && 
           <GameView
             categories={this.state.categoriesList}
+            onChange={this.onChangeAnswer}
           />
         }
         <JoinForm
