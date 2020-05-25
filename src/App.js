@@ -144,8 +144,6 @@ class App extends Component {
     for ( var i = 0; i < length; i++ ) {
        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-    console.log(result);
-    result = "XXXX";
     this.setState({
       roomCode: result,
     });
@@ -379,6 +377,10 @@ class App extends Component {
       .child(uid)
       .child('answers')
       .set(answers);
+  }
+
+  componentWillUnmount = () => {
+    // TODO: put leaving logic here
   }
 
   render() {
