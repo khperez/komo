@@ -7,9 +7,8 @@ import LobbyView from './components/LobbyView';
 import JoinView from './components/JoinView';
 import GameView from './components/GameView';
 import AdminView from './components/AdminView';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import JoinForm from './components/forms/JoinForm';
+import ResultView from './components/ResultView';
 
 class App extends Component {
   constructor(props) {
@@ -25,12 +24,15 @@ class App extends Component {
       isLobbyView: false,
       isJoinView: false,
       isGameView: false,
+      isResultViiew: false,
       currentUser: null,
       username: null,
       isValidRoom: null,
       numCategories: 0,
       players: [],
       modalShow: false,
+      localCategories: [],
+      categoryLetter: null,
     };
   }
 
@@ -81,12 +83,12 @@ class App extends Component {
     database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
   }
 
-  onChangeAnswer = (category_id, event) => {
+  onChangeAnswer = (categoryId, event) => {
     // Preferred way to modify an element in a state array:
     // https://stackoverflow.com/a/42037439/6606953
-    const new_categories = this.state.local_categories // copy the array
-    new_categories[category_id].answer = event.target.value; // manipulate data
-    this.setState({loca_categories: new_categories}) // set the new state
+    const newCategories = this.state.categoriesList// copy the array
+    newCategories[categoryId].answer = event.target.value; // manipulate data
+    this.setState({categoriesList: newCategories}) // set the new state
   }
 
   onChangeNumCategories(event) {
@@ -168,6 +170,14 @@ class App extends Component {
     console.log("Join Lobby");
     this.addPlayer();
     this.updateLobbyPlayers();
+    const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted');
+    isGameStartedRef.on('value', snapshot => {
+      if (snapshot.val() === true) {
+        database.ref(this.state.roomCode).child('players').off();
+      }
+    }, function(err) {
+      alert(`isGameStart read failed: ${err.code}`)
+    });
   }
 
   setCategories = () => {
@@ -178,10 +188,21 @@ class App extends Component {
     }
   }
 
-  startGame = () => {
-    console.log("Game START");
+  generateCategoryLetter = () => {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ';
+    result = characters.charAt(Math.floor(Math.random() * characters.length));
+    this.setState({
+      categoryLetter: result,
+    }, this.sendStartSignal);
+  }
+
+  sendStartSignal = () => {
+    console.log(this.state.categoryLetter);
     // Notify non-host players that the game is starting
+    database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
     database.ref(this.state.roomCode).child('isGameStarted').set(true);
+    database.ref(this.state.roomCode).child('players').off();
     // TODO: I think this line can be removed actually becaues we can have
     // the host listening for the start signal uisng isGameStartedRef
     console.log("Number of categories: " + this.state.numCategories);
@@ -191,6 +212,11 @@ class App extends Component {
       isJoinView: false,
       isLobbyView: false
     })
+  }
+
+  startGame = () => {
+    console.log("Game START");
+    this.generateCategoryLetter();
   }
 
   changeHandler = (event) => {
@@ -260,6 +286,30 @@ class App extends Component {
     this.updateLobbyPlayers();
   };
 
+  onSubmitAnswers = () => {
+    this.setState({
+      isGameView: false,
+      isResultView: true,
+    })
+    this.setState({
+      isResultView: true,
+      isGameView: false,
+      isLobbyView: false,
+    });
+    // Push the user-provided answers to the database
+    let answers = []
+    for (var i = 0; i < this.state.categoriesList.length; i++) {
+      answers.push(this.state.categoriesList[i].answer)
+    }
+    console.log(answers);
+    let uid = auth.currentUser.uid;
+    database.ref(this.state.roomCode)
+      .child('players')
+      .child(uid)
+      .child('answers')
+      .set(answers);
+  }
+
   render() {
     return (
       <div className="App">
@@ -297,8 +347,14 @@ class App extends Component {
           && 
           <GameView
             categories={this.state.categoriesList}
+            categoryLetter={this.state.categoryLetter}
             onChange={this.onChangeAnswer}
+            onSubmit={this.onSubmitAnswers}
           />
+        }
+        {this.state.isResultView
+          && 
+          <ResultView/>
         }
         <JoinForm
           show={this.state.modalShow}

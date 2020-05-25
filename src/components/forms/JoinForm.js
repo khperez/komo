@@ -15,7 +15,7 @@ export default function JoinForm(props) {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            Create Game
+              {props.host==="true" ?  "Create Game" : "Join Game"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -32,7 +32,7 @@ export default function JoinForm(props) {
               <FormGroup>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
-                  placeholder="Enter room code"
+                  placeholder="Enter username"
                   name="username"
                 />
               </FormGroup>
