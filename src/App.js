@@ -42,15 +42,17 @@ class App extends Component {
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log("setting current user");
+        numPlayers = this.state.numPlayers + 1
         this.setState({
           currentUser: user.uid,
-          numPlayers: this.state.numPlayers + 1, 
+          numPlayers: numPlayers,
         });
         if (this.state.roomCode) {
           console.log("[database] set roomCode")
-          database.ref(this.state.roomCode).child('numPlayers')
-            .set(this.state.numPlayers);
-          if (this.state.numPlayers === 1) {
+          database.ref(this.state.roomCode)
+            .child('numPlayers')
+            .set(numPlayers);
+          if (numPlayers === 1) {
             console.log("setting host");
             this.setState({
               isHost: true,
