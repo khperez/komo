@@ -6,9 +6,9 @@ import StartView from './components/StartView';
 import LobbyView from './components/LobbyView';
 import JoinView from './components/JoinView';
 import GameView from './components/GameView';
-import AdminView from './components/AdminView';
 import JoinForm from './components/forms/JoinForm';
 import ResultView from './components/ResultView';
+import AwaitResultsView from './components/AwaitResultsView';
 
 class App extends Component {
   constructor(props) {
@@ -25,6 +25,7 @@ class App extends Component {
       isJoinView: false,
       isGameView: false,
       isResultViiew: false,
+      isAwaitResultsView: false,
       currentUser: null,
       username: null,
       isValidRoom: null,
@@ -58,7 +59,7 @@ class App extends Component {
       this.setState({
         isHost: true,
       }, this.setHostDatabase);
-    } else {
+    } else if (this.state.numPlayers === 0) {
       this.setState({
         modalShow: true,
       })
@@ -82,7 +83,7 @@ class App extends Component {
             .child('numPlayers')
             .once('value').then((snapshot) => {
               let players = 0;
-              if (!snapshot.val()) {
+              if (!snapshot.exists()) {
                 players = 1;
               } else {
                 players = snapshot.val() + 1;
@@ -100,10 +101,7 @@ class App extends Component {
     });
   }
 
-  addPlayer = () => {
-    var uid = auth.currentUser.uid;
-    database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
-  }
+
 
   onChangeAnswer = (categoryId, event) => {
     // Preferred way to modify an element in a state array:
@@ -139,7 +137,7 @@ class App extends Component {
   
   generateRoomCode = (length = 4) => {
     var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456790';
+    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ12345679';
     var charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
        result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -237,6 +235,9 @@ class App extends Component {
   startGame = () => {
     console.log("Game START");
     this.generateCategoryLetter();
+    this.setState({
+      players: []
+    })
   }
 
   changeHandler = (event) => {
@@ -251,30 +252,26 @@ class App extends Component {
   }
 
   setValidRoom = (value) => {
+    if (value === true) {
+      this.setModalShow(false);
+      if (this.state.isHost) {
+        this.setState({
+          isStartView: false,
+          isLobbyView: true,
+          isHostView: true,
+        });
+      } else {
+        this.setState({
+          isStartView: false,
+          isLobbyView: true,
+          isHostView: false,
+        }, this.waitForGameStart);
+      }
+      this.updateLobbyPlayers();
+    }
     this.setState({
       isValidRoom: value,
     })
-    if (this.state.isValidRoom === true) {
-      this.setState({
-        isJoinView: false,
-        isLobbyView: true,
-      });
-    }
-  }
-
-  submitHandler = (event) => {
-    event.preventDefault();
-    console.log("submitHandler called");
-    database.ref(this.state.roomCode).once('value').then((snapshot) => {
-      if (snapshot.val() !== null) {
-        console.log("this is a valid room");
-        this.setValidRoom(true);
-      } else {
-        alert("This is not a valid room. Please try again");
-        this.setValidRoom(false);
-      }
-    });
-    this.joinLobby();
   }
 
   submitHostFormHandler = (event) => {
@@ -327,6 +324,7 @@ class App extends Component {
   }
 
   waitForGameStart = () => {
+    this.setNumPlayersDatabase();
     console.log("wait for game start");
     database.ref(this.state.roomCode).child('isGameStarted')
       .on('value', (snapshot) => {
@@ -336,40 +334,71 @@ class App extends Component {
       });
   }
 
-  submitName = () => {
-    this.setModalShow(false);
-    this.addPlayer();
-    if (this.state.isHost) {
-      this.setState({
-        isStartView: false,
-        isLobbyView: true,
-        isHostView: true,
-      });
-    } else {
-      this.setState({
-        isStartView: false,
-        isLobbyView: true,
-        isHostView: false,
-      }, this.waitForGameStart);
-    }
-    this.updateLobbyPlayers();
+  checkRoomCode = () => {
+    console.log("isvalidroomdatabase")
+    database.ref(this.state.roomCode).once('value').then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log("this is a valid room");
+        this.setValidRoom(true);
+      } else {
+        alert("This is not a valid room. Please try again");
+        this.setValidRoom(false);
+      }
+    });
+  }
+
+  addPlayer = () => {
+    var uid = auth.currentUser.uid;
+    database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
+  }
+
+  submitCredentials = () => {
+    this.checkRoomCode();
   };
 
+  incrementSubmittedCounter = () => {
+    var submittedCounterRef = database.ref(this.state.roomCode+"/submittedCounter");
+    submittedCounterRef.transaction(function(counter) {
+      // If users/ada/rank has never been set, currentRank will be `null`.
+      return counter + 1;
+    });
+  }
+
+  calculateResults = () => {
+    console.log("host is calculating results");
+  }
+
+  showVotingView = () => {
+    console.log("show voting view");
+  }
+
+  runPreVotingValidation = () => {
+    var playerRef = database.ref(this.state.roomCode)
+    .child('players')
+
+  }
+
   onSubmitAnswers = () => {
+    this.addPlayer();
     this.setState({
       isGameView: false,
-      isResultView: true,
+      isAwaitResultsView: true,
     })
     this.setState({
-      isResultView: true,
+      isAwaitResultsView: true,
       isGameView: false,
       isLobbyView: false,
     });
     // Push the user-provided answers to the database
     let answers = []
     for (var i = 0; i < this.state.categoriesList.length; i++) {
-      answers.push(this.state.categoriesList[i].answer)
+      let answer = {
+        value: this.state.categoriesList[i].answer,
+        valid: false
+      }
+      answers.push(answer)
     }
+    //this.runPreVotingValidation();
     console.log(answers);
     let uid = auth.currentUser.uid;
     database.ref(this.state.roomCode)
@@ -377,10 +406,23 @@ class App extends Component {
       .child(uid)
       .child('answers')
       .set(answers);
+    this.incrementSubmittedCounter();
+    if (this.state.isHost) {
+      database.ref(this.state.roomCode)
+        .child("submittedCounter")
+        .on('value', (snapshot) => {
+          if (snapshot.val() === this.state.numPlayers) {
+            console.log("all players submitted")
+          }
+        })
+    }
   }
 
   componentWillUnmount = () => {
     // TODO: put leaving logic here
+    console.log("Component will unmount");
+    auth.signOut();
+    database.ref(this.state.roomCode+"/abandoned").set(true);
   }
 
   render() {
@@ -393,14 +435,6 @@ class App extends Component {
             onJoin={this.joinGame}
           />
         }
-        {this.state.isJoinView
-          && 
-          <JoinView 
-            changeHandler={this.changeHandler}
-            submitHandler={this.submitHandler}
-            validRoom={this.state.validRoom}
-          />
-         }
         {this.state.isHostView
           &&
           <HostView code={this.state.roomCode}
@@ -425,6 +459,10 @@ class App extends Component {
             onSubmit={this.onSubmitAnswers}
           />
         }
+        {this.state.isAwaitResultsView
+          &&
+          <AwaitResultsView players={this.state.players}/>
+        }
         {this.state.isResultView
           && 
           <ResultView/>
@@ -432,7 +470,7 @@ class App extends Component {
         <JoinForm
           show={this.state.modalShow}
           onHide={() => this.setState({modalShow: false})}
-          onSubmit={this.submitName}
+          onSubmit={this.submitCredentials}
           onChange={this.changeHandler}
           host={this.state.isHost.toString()}
         />
