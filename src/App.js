@@ -358,11 +358,6 @@ class App extends Component {
     console.log("show voting view");
   }
 
-  runPreVotingValidation = () => {
-    var playerRef = database.ref(this.state.roomCode)
-    .child('players')
-  }
-
   onSubmitAnswers = () => {
     this.setState({
       isAwaitResultsView: true,
@@ -376,9 +371,13 @@ class App extends Component {
         value: this.state.categoriesList[i].answer,
         valid: false
       }
+
+      if (answer.value.toUpperCase().startsWith(this.state.categoryLetter)) {
+        answer.valid = true
+      }
       answers.push(answer)
     }
-    //this.runPreVotingValidation();
+
     console.log('[database] setting answers ' + answers.map(ans => ans.value))
 
     let uid = auth.currentUser.uid;
