@@ -41,11 +41,6 @@ class App extends Component {
     database.ref(this.state.roomCode)
       .child('host')
       .set(this.state.currentUser);
-    database.ref(this.state.roomCode)
-      .child('players')
-      .child(this.state.currentUser)
-      .child('name')
-      .set(this.state.username);
     this.setState({
       modalShow: true,
     })
@@ -60,9 +55,7 @@ class App extends Component {
         isHost: true,
       }, this.setHostDatabase);
     } else if (this.state.numPlayers === 0) {
-      this.setState({
-        modalShow: true,
-      })
+      console.error('We should never get here, host or not-host.')
     }
   }
 
@@ -73,12 +66,12 @@ class App extends Component {
 
     auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("setting current user");
+        console.log("setting current user as " + user.uid);
         this.setState({
           currentUser: user.uid,
         });
         if (this.state.roomCode) {
-          console.log("[database] set roomCode")
+          console.log("[database] set roomCode as " + this.state.roomCode)
           database.ref(this.state.roomCode)
             .child('numPlayers')
             .once('value').then((snapshot) => {
@@ -86,11 +79,11 @@ class App extends Component {
               if (!snapshot.exists()) {
                 players = 1;
               } else {
-                players = snapshot.val() + 1;
+                console.error('The host attempted to take a room with players in it already')
               }
               this.setState({
                 numPlayers: players,
-              },this.setNumPlayersDatabase); 
+              }, this.setNumPlayersDatabase);
           })
         } else {
           this.setState({
@@ -144,11 +137,11 @@ class App extends Component {
     }
     this.setState({
       roomCode: result,
-    });
+    }, this.login); // OnAuthStateChanged expects a valid this.state.roomCode for host,
+                    // so don't login until setState is completed
   }
 
   createGame = () => {
-    this.login();
     this.generateRoomCode();
     this.setState({
       //isStartView: false,
@@ -335,10 +328,28 @@ class App extends Component {
   }
 
   checkRoomCode = () => {
-    console.log("isvalidroomdatabase")
     database.ref(this.state.roomCode).once('value').then((snapshot) => {
       if (snapshot.exists()) {
         console.log("this is a valid room");
+
+        if (!this.state.isHost) {
+          // This is the earliest possible point at which a non-host has
+          // a room code to use for checking the number of players
+          database.ref(this.state.roomCode)
+            .child('numPlayers')
+            .once('value').then((snapshot) => {
+              let players = 0;
+              if (!snapshot.exists()) {
+                console.error('Non-host attempted to join a valid room without a host!')
+              } else {
+                players = snapshot.val() + 1;
+              }
+              this.setState({
+                numPlayers: players,
+              }, this.setNumPlayersDatabase);
+          })
+        }
+
         this.setValidRoom(true);
       } else {
         alert("This is not a valid room. Please try again");
@@ -353,7 +364,12 @@ class App extends Component {
   }
 
   submitCredentials = () => {
-    this.checkRoomCode();
+    if (!this.state.isHost) {
+      this.checkRoomCode();
+    } else {
+      this.setValidRoom(true);
+    }
+    this.addPlayer();
   };
 
   incrementSubmittedCounter = () => {

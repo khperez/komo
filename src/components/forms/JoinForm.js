@@ -5,7 +5,6 @@ import Form from 'react-bootstrap/Form';
 import FormGroup from 'react-bootstrap/FormGroup';
 
 export default function JoinForm(props) {
-  console.log(props.host);
   return (
     <div>
       <Modal
