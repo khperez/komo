@@ -31,6 +31,7 @@ class App extends Component {
       isValidRoom: null,
       numCategories: 0,
       players: [],
+      submittedPlayers: [],
       modalShow: false,
       localCategories: [],
       categoryLetter: null,
@@ -195,9 +196,6 @@ class App extends Component {
   startGame = () => {
     console.log("Game START");
     this.generateCategoryLetter();
-    this.setState({
-      players: []
-    })
   }
 
   changeHandler = (event) => {
@@ -283,11 +281,11 @@ class App extends Component {
   }
 
   waitForGameStart = () => {
-    this.setNumPlayersDatabase();
-    console.log("wait for game start");
+    console.log("Waiting for host to start the game");
     database.ref(this.state.roomCode).child('isGameStarted')
       .on('value', (snapshot) => {
         if (snapshot.val() === true) {
+          database.ref(this.state.roomCode).child('players').off();
           this.showGameView();
         }
       });
@@ -312,11 +310,17 @@ class App extends Component {
               }
               this.setState({
                 numPlayers: players,
-              }, this.setNumPlayersDatabase);
-          })
+              }, () => {
+                this.setNumPlayersDatabase();
+                this.setValidRoom(true);
+              });
+            })
+        }
+        else
+        {
+          this.setValidRoom(true);
         }
 
-        this.setValidRoom(true);
       } else {
         alert("This is not a valid room. Please try again");
         this.setValidRoom(false);
@@ -357,15 +361,9 @@ class App extends Component {
   runPreVotingValidation = () => {
     var playerRef = database.ref(this.state.roomCode)
     .child('players')
-
   }
 
   onSubmitAnswers = () => {
-    this.addPlayer();
-    this.setState({
-      isGameView: false,
-      isAwaitResultsView: true,
-    })
     this.setState({
       isAwaitResultsView: true,
       isGameView: false,
@@ -399,6 +397,21 @@ class App extends Component {
           }
         })
     }
+    database.ref(this.state.roomCode)
+      .child('submittedPlayers')
+      .push(this.state.username)
+    database.ref(this.state.roomCode)
+      .child('submittedPlayers')
+      .on('value', snapshot => {
+          var submittedPlayers = []
+          snapshot.forEach(function(data) {
+            submittedPlayers.push(data.val());
+          });
+
+          this.setState({
+            submittedPlayers: submittedPlayers
+          })
+      })
   }
 
   componentWillUnmount = () => {
@@ -411,8 +424,8 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        {this.state.isStartView 
-          && 
+        {this.state.isStartView
+          &&
           <StartView
             onCreate={this.createGame}
             onJoin={this.joinGame}
@@ -427,14 +440,14 @@ class App extends Component {
           />
         }
         {this.state.isLobbyView
-          && 
-          <LobbyView 
+          &&
+          <LobbyView
             players={this.state.players}
             roomCode={this.state.roomCode}
           />
         }
         {this.state.isGameView
-          && 
+          &&
           <GameView
             categories={this.state.categoriesList}
             categoryLetter={this.state.categoryLetter}
@@ -444,10 +457,10 @@ class App extends Component {
         }
         {this.state.isAwaitResultsView
           &&
-          <AwaitResultsView players={this.state.players}/>
+          <AwaitResultsView players={this.state.submittedPlayers}/>
         }
         {this.state.isResultView
-          && 
+          &&
           <ResultView/>
         }
         <JoinForm
