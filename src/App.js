@@ -48,9 +48,9 @@ class App extends Component {
 
   setNumPlayersDatabase = () => {
     database.ref(this.state.roomCode).child('numPlayers').set(this.state.numPlayers);
-    console.log("numPlayers: " + this.state.numPlayers);
+    console.log("[local] numPlayers = " + this.state.numPlayers);
     if (this.state.numPlayers === 1) {
-      console.log("setting host");
+      console.log("I am host");
       this.setState({
         isHost: true,
       }, this.setHostDatabase);
@@ -66,7 +66,7 @@ class App extends Component {
 
     auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("setting current user as " + user.uid);
+        console.log("[local] setting current user id as " + user.uid);
         this.setState({
           currentUser: user.uid,
         });
@@ -94,8 +94,6 @@ class App extends Component {
     });
   }
 
-
-
   onChangeAnswer = (categoryId, event) => {
     // Preferred way to modify an element in a state array:
     // https://stackoverflow.com/a/42037439/6606953
@@ -104,30 +102,10 @@ class App extends Component {
     this.setState({categoriesList: newCategories}) // set the new state
   }
 
-  onChangeNumCategories(event) {
-    this.setState({local_categories: GenerateRandomCategories(event.target.value) })
-  }
-
-  onSubmitNumCategories(event) {
-    event.preventDefault();
-
-    // Stop the user from changing the number of catergories once the submit
-    // button is pressed.
-    this.setState({hideNumCategoriesForm: true})
-
-    // Share the category list with other players in the same room
-    // (Need to sanitize it first by removing answer and id field)
-    let categories = [];
-    for (var i = 0; i < this.state.local_categories.length; i++) {
-      categories.push(this.state.local_categories[i].name)
-    }
-    database.ref(this.state.room_code).child('local_categories').set(categories);
-  }
-
   login = () => {
     auth.signInAnonymously();
   }
-  
+
   generateRoomCode = (length = 4) => {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ12345679';
@@ -156,7 +134,7 @@ class App extends Component {
   }
 
   setLobbyView = () => {
-    console.log(this.state.players);
+    console.log('[local] List of players: ' + this.state.players);
     this.setState({
       isLobbyView: true,
     });
@@ -177,25 +155,17 @@ class App extends Component {
     });
   }
 
-  joinLobby = () => {
-    console.log("Join Lobby");
-    this.addPlayer();
-    this.updateLobbyPlayers();
-    const isGameStartedRef = database.ref(this.state.room_code).child('isGameStarted');
-    isGameStartedRef.on('value', snapshot => {
-      if (snapshot.val() === true) {
-        database.ref(this.state.roomCode).child('players').off();
-      }
-    }, function(err) {
-      alert(`isGameStart read failed: ${err.code}`)
-    });
-  }
-
-  setCategories = () => {
+  setCategoriesDatabase = () => {
     if (this.state.isHost) {
-      console.log("pushing categories to server");
+      console.log("[datbase] setting " + this.state.numCategories + " categories");
       let categories = this.state.categoriesList.map(category => category.name);
-      database.ref(this.state.roomCode).child('categories').set(categories);
+      database.ref(this.state.roomCode).child('categories').set(
+        categories,
+        (err) => {
+          // Once we're here, the categories have been uploaded to the database
+          // and we're ready to start the game
+          this.startGame()
+        });
     }
   }
 
@@ -209,14 +179,11 @@ class App extends Component {
   }
 
   sendStartSignal = () => {
-    console.log(this.state.categoryLetter);
+    console.log('Category Letter = ' + this.state.categoryLetter);
     // Notify non-host players that the game is starting
     database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
     database.ref(this.state.roomCode).child('isGameStarted').set(true);
     database.ref(this.state.roomCode).child('players').off();
-    // TODO: I think this line can be removed actually becaues we can have
-    // the host listening for the start signal uisng isGameStartedRef
-    console.log("Number of categories: " + this.state.numCategories);
     this.setState({
       isGameView: true,
       isHostView: false,
@@ -269,13 +236,12 @@ class App extends Component {
 
   submitHostFormHandler = (event) => {
     event.preventDefault();
-    console.log("setting categories locally");
+    console.log("[local] setting " + this.state.numCategories + " categories");
     this.setState({
       categoriesList: GenerateRandomCategories(this.state.numCategories)
     },
-      this.setCategories
+      this.setCategoriesDatabase
     );
-    this.startGame();
   }
 
   setModalShow = (value) => {
@@ -283,7 +249,7 @@ class App extends Component {
       modalShow: value,
     });
   }
- 
+
   showGameView = () => {
     database.ref(this.state.roomCode)
       .child('categoryLetter')
@@ -330,7 +296,7 @@ class App extends Component {
   checkRoomCode = () => {
     database.ref(this.state.roomCode).once('value').then((snapshot) => {
       if (snapshot.exists()) {
-        console.log("this is a valid room");
+        console.log(this.state.roomCode + " is a valid room");
 
         if (!this.state.isHost) {
           // This is the earliest possible point at which a non-host has
@@ -415,7 +381,8 @@ class App extends Component {
       answers.push(answer)
     }
     //this.runPreVotingValidation();
-    console.log(answers);
+    console.log('[database] setting answers ' + answers.map(ans => ans.value))
+
     let uid = auth.currentUser.uid;
     database.ref(this.state.roomCode)
       .child('players')
@@ -428,7 +395,7 @@ class App extends Component {
         .child("submittedCounter")
         .on('value', (snapshot) => {
           if (snapshot.val() === this.state.numPlayers) {
-            console.log("all players submitted")
+            console.log("All players have submitted their answers")
           }
         })
     }
@@ -492,12 +459,7 @@ class App extends Component {
         />
       </div>
     );
-  } 
-}
-
-function ConsoleLogCategory(c) {
-    // Pretty-print function for category
-    console.log(JSON.stringify(c, undefined, 2))
+  }
 }
 
 function GenerateRandomCategories(size) {
@@ -528,11 +490,6 @@ function GenerateRandomCategories(size) {
         })
         // Remove the chosen category from the list so we don't get duplicates
         possible_categories.splice(random_index, 1)
-    }
-
-    for (var j = 0; j < chosen_categories.length; j++) {
-      const c = chosen_categories[j];
-      ConsoleLogCategory(c);
     }
 
     return chosen_categories;
