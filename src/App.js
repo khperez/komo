@@ -152,6 +152,8 @@ class App extends Component {
       isStartView: false,
       modalShowCreateGame: false,
       isLobbyView: true,
+      isHostView: true,
+      isHost: true,
     })
   }
 
