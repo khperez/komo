@@ -73,26 +73,6 @@ class App extends Component {
         this.setState({
           currentUser: user.uid,
         });
-        if (this.state.roomCode) {
-          console.log("[database] set roomCode as " + this.state.roomCode)
-          database.ref(this.state.roomCode)
-            .child('numPlayers')
-            .once('value').then((snapshot) => {
-              let players = 0;
-              if (!snapshot.exists()) {
-                players = 1;
-              } else {
-                console.error('The host attempted to take a room with players in it already')
-              }
-              this.setState({
-                numPlayers: players,
-              }, this.setNumPlayersDatabase);
-          })
-        } else {
-          this.setState({
-            modalShow: true,
-          })
-        }
       }
     });
   }
@@ -105,11 +85,7 @@ class App extends Component {
     this.setState({categoriesList: newCategories}) // set the new state
   }
 
-  login = () => {
-    auth.signInAnonymously();
-  }
-
-  generateRoomCode = (length = 4) => {
+  generateRoomCode = async (length = 4) => {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ12345679';
     var charactersLength = characters.length;
@@ -119,23 +95,81 @@ class App extends Component {
     this.setState({
       roomCode: result,
     }, () => {
-      this.login();
       this.setValidRoom(true)
     }); // OnAuthStateChanged expects a valid this.state.roomCode for host,
                     // so don't login until setState is completed
+    return result
+  }
+
+  checkRoomCode = async () => {
+    console.log("checkRoomCode")
+    database.ref(this.state.roomCode).once('value').then((snapshot) => {
+      if (snapshot.exists()) {
+        console.log(this.state.roomCode + " is a valid room");
+        database.ref(this.state.roomCode)
+          .child('numPlayers')
+          .once('value').then((snapshot) => {
+            let players = 0;
+            if (!snapshot.exists()) {
+              console.error('Non-host attempted to join a valid room without a host!')
+            } else {
+              players = snapshot.val() + 1;
+            }
+            this.setState({
+              numPlayers: players,
+            }, () => {
+              this.setNumPlayersDatabase();
+              this.setValidRoom(true);
+            });
+          })
+        return this.state.roomCode
+      } else {
+        alert("This is not a valid room. Please try again");
+        this.setValidRoom(false);
+      }
+    });
+  }
+
+  login = async () => {
+    console.log("Logging in")
+    return (await auth.signInAnonymously()).user.uid
+  }
+
+  createUser = (uid) => {
+    database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
   }
 
   createGame = () => {
-    this.login();
     this.setState({
       modalShowCreateGame: true,
     })
   }
 
   joinGame = () => {
-    this.login();
     this.setState({
       modalShowJoinGame: true,
+    })
+  }
+
+  submitCreateForm = () => {
+    this.generateRoomCode()
+      .then(this.login()
+        .then(this.createUser))
+    this.setState({
+      isStartView: false,
+      modalShowCreateGame: false,
+      isLobbyView: true,
+    })
+  }
+
+  submitJoinForm = () => {
+    this.checkRoomCode()
+      .then(this.login()
+        .then(this.createUser))
+    this.setState({
+      isStartView: false,
+      modalShowJoinGame: false,
+      isLobbyView: true,
     })
   }
 
@@ -296,53 +330,6 @@ class App extends Component {
           this.showGameView();
         }
       });
-  }
-
-  checkRoomCode = () => {
-    console.log("checkRoomCode")
-    database.ref(this.state.roomCode).once('value').then((snapshot) => {
-      if (snapshot.exists()) {
-        console.log(this.state.roomCode + " is a valid room");
-        database.ref(this.state.roomCode)
-          .child('numPlayers')
-          .once('value').then((snapshot) => {
-            let players = 0;
-            if (!snapshot.exists()) {
-              console.error('Non-host attempted to join a valid room without a host!')
-            } else {
-              players = snapshot.val() + 1;
-            }
-            this.setState({
-              numPlayers: players,
-            }, () => {
-              this.setNumPlayersDatabase();
-              this.setValidRoom(true);
-            });
-          })
-      } else {
-        alert("This is not a valid room. Please try again");
-        this.setValidRoom(false);
-      }
-    });
-  }
-
-  addPlayer = () => {
-    var uid = auth.currentUser.uid;
-    database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
-  }
-
-  submitJoinForm = () => {
-    this.checkRoomCode();
-    this.addPlayer();
-  }
-
-  submitCreateForm = () => {
-    this.generateRoomCode()
-    this.setState({
-      isStartView: false,
-      modalShowCreateGame: false,
-      isLobbyView: true,
-    })
   }
 
   incrementSubmittedCounter = () => {
