@@ -15,12 +15,11 @@ export default function JoinForm(props) {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-              {props.host==="true" ?  "Create Game" : "Join Game"}
+            Join Game
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onChange={props.onChange}>
-              {props.host==="false" &&
               <FormGroup>
                 <Form.Label>Room Code</Form.Label>
                 <Form.Control
@@ -28,7 +27,6 @@ export default function JoinForm(props) {
                   name="roomCode"
                 />
               </FormGroup>
-              }
               <FormGroup>
                 <Form.Label>Username</Form.Label>
                 <Form.Control

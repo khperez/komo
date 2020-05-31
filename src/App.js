@@ -4,9 +4,9 @@ import { database, auth } from './firebase';
 import HostView from './components/HostView';
 import StartView from './components/StartView';
 import LobbyView from './components/LobbyView';
-import JoinView from './components/JoinView';
 import GameView from './components/GameView';
 import JoinForm from './components/forms/JoinForm';
+import CreateForm from './components/forms/CreateForm';
 import ResultView from './components/ResultView';
 import AwaitResultsView from './components/AwaitResultsView';
 
@@ -32,7 +32,8 @@ class App extends Component {
       numCategories: 0,
       players: [],
       submittedPlayers: [],
-      modalShow: false,
+      modalShowCreateGame: false,
+      modalShowJoinGame: false,
       localCategories: [],
       categoryLetter: null,
     };
@@ -121,17 +122,15 @@ class App extends Component {
   }
 
   createGame = () => {
-    this.generateRoomCode();
     this.setState({
-      //isStartView: false,
-      //isLobbyView: true,
-      //isHostView: true,
-      // modalShow: true,
-    });
+      modalShowCreateGame: true,
+    })
   }
 
   joinGame = () => {
-    this.login();
+    this.setState({
+      modalShowJoinGame: true,
+    })
   }
 
   setLobbyView = () => {
@@ -333,7 +332,7 @@ class App extends Component {
     database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
   }
 
-  submitCredentials = () => {
+  submitJoinForm = () => {
     if (!this.state.isHost) {
       this.checkRoomCode();
     } else {
@@ -341,6 +340,13 @@ class App extends Component {
     }
     this.addPlayer();
   };
+
+  submitCreateForm = () => {
+    this.setState({
+      modalCreateGameShow: true,
+    })
+
+  }
 
   incrementSubmittedCounter = () => {
     var submittedCounterRef = database.ref(this.state.roomCode+"/submittedCounter");
@@ -462,12 +468,17 @@ class App extends Component {
           &&
           <ResultView/>
         }
-        <JoinForm
-          show={this.state.modalShow}
-          onHide={() => this.setState({modalShow: false})}
-          onSubmit={this.submitCredentials}
+        <CreateForm
+          show={this.state.modalShowCreateGame}
+          onHide={() => this.setState({modalShowCreateGame: false})}
+          onSubmit={this.submitCreateForm}
           onChange={this.changeHandler}
-          host={this.state.isHost.toString()}
+        />
+        <JoinForm
+          show={this.state.modalShowJoinGame}
+          onHide={() => this.setState({modalShowJoinGame: false})}
+          onSubmit={this.submitJoinForm}
+          onChange={this.changeHandler}
         />
       </div>
     );
