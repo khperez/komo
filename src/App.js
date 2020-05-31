@@ -9,6 +9,7 @@ import JoinForm from './components/forms/JoinForm';
 import CreateForm from './components/forms/CreateForm';
 import ResultView from './components/ResultView';
 import AwaitResultsView from './components/AwaitResultsView';
+import AdminView from './components/AdminView';
 
 class App extends Component {
   constructor(props) {
@@ -426,6 +427,11 @@ class App extends Component {
     database.ref(this.state.roomCode+"/abandoned").set(true);
   }
 
+  onClickAdminView = () => {
+    console.log("Obliterating database")
+    database.ref().set(null)
+  }
+
   render() {
     return (
       <div className="App">
@@ -480,6 +486,7 @@ class App extends Component {
           onSubmit={this.submitJoinForm}
           onChange={this.changeHandler}
         />
+        <AdminView onClick={this.onClickAdminView} />
       </div>
     );
   }
