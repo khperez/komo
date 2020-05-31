@@ -40,28 +40,6 @@ class App extends Component {
     };
   }
 
-  setHostDatabase = () => {
-    database.ref(this.state.roomCode)
-      .child('host')
-      .set(this.state.currentUser);
-    this.setState({
-      modalShow: true,
-    })
-  }
-
-  setNumPlayersDatabase = () => {
-    database.ref(this.state.roomCode).child('numPlayers').set(this.state.numPlayers);
-    console.log("[local] numPlayers = " + this.state.numPlayers);
-    if (this.state.numPlayers === 1) {
-      console.log("I am host");
-      this.setState({
-        isHost: true,
-      }, this.setHostDatabase);
-    } else if (this.state.numPlayers === 0) {
-      console.error('We should never get here, host or not-host.')
-    }
-  }
-
   componentDidMount() {
     // Sign out by default for now so we can test the 'Anonymous Login' button.
     // TODO: Probably should remove this in production TM.
@@ -118,7 +96,7 @@ class App extends Component {
             this.setState({
               numPlayers: players,
             }, () => {
-              this.setNumPlayersDatabase();
+              this.updateNumPlayersDb();
               this.setValidRoom(true);
             });
           })
@@ -130,6 +108,11 @@ class App extends Component {
     });
   }
 
+  setHostDb = () => {
+    database.ref(this.state.roomCode+"/host")
+      .set(this.state.currentUser)
+  }
+
   login = async () => {
     console.log("Logging in")
     return (await auth.signInAnonymously()).user.uid
@@ -137,6 +120,7 @@ class App extends Component {
 
   createUser = (uid) => {
     database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
+    return uid 
   }
 
   createGame = () => {
@@ -151,10 +135,19 @@ class App extends Component {
     })
   }
 
+  updateNumPlayersDb = () => {
+    const numPlayersRef = database.ref(this.state.roomCode+"/numPlayers")
+    numPlayersRef.transaction((count) => {
+      return count + 1
+    })
+  }
+
   submitCreateForm = () => {
     this.generateRoomCode()
       .then(this.login()
-        .then(this.createUser))
+        .then(this.createUser)
+          .then(this.updateNumPlayersDb)
+            .then(this.setHostDb))
     this.setState({
       isStartView: false,
       modalShowCreateGame: false,
@@ -250,7 +243,6 @@ class App extends Component {
   }
 
   setValidRoom = (value) => {
-    console.log("===setValidRoom===")
     if (value === true) {
       this.setModalShow(false);
       if (this.state.isHost) {
