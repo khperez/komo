@@ -383,9 +383,10 @@ class App extends Component {
     if (this.state.isHost) {
       database.ref(this.state.roomCode)
         .child("submittedCounter")
-        .on('value', (snapshot) => {
+        .on('value', snapshot => {
           if (snapshot.val() === this.state.numPlayers) {
             console.log("All players have submitted their answers")
+            this.getAnswersFromAllPlayers()
           }
         })
     }
@@ -403,6 +404,32 @@ class App extends Component {
           this.setState({
             submittedPlayers: submittedPlayers
           })
+      })
+  }
+
+  getAnswersFromAllPlayers = () => {
+    database.ref(this.state.roomCode)
+      .child('players')
+      .on('value', snapshot => {
+        let allAnswers = Array(this.state.numCategories)
+        for (var j = 0; j < this.state.numCategories; j++) {
+          allAnswers[j] = {}
+        }
+
+        if (snapshot.exists()) {
+          snapshot.forEach(childSnapshot => {
+            var answers = childSnapshot.val().answers
+
+            for (var i = 0; i < answers.length; i++) {
+              const answer = answers[i]
+              allAnswers[i][childSnapshot.key] = answer
+            }
+          })
+        }
+
+        database.ref(this.state.roomCode)
+          .child('allAnswers')
+          .set(allAnswers)
       })
   }
 
