@@ -464,6 +464,77 @@ class App extends Component {
             submittedPlayers: submittedPlayers
           })
       })
+
+    database.ref(this.state.roomCode)
+      .child('allAnswers')
+      .on('value', snapshot => {
+        if (snapshot.exists()) {
+          console.log(snapshot.val())
+
+          this.setState({
+            voteResults: this.getVoteResults(snapshot.val())
+          }, this.setupVoteView)
+
+          database.ref(this.state.roomCode)
+            .child('allAnswers')
+            .off()
+        }
+      })
+  }
+
+  setupVoteView = () => {
+
+  }
+
+  // FIXME give better func name
+  getVoteResults = (allAnswers) => {
+    var voteResults = Array(allAnswers.length)
+    for (var k = 0; k < allAnswers.length; k++) {
+      voteResults[k] = {}
+    }
+
+    // Use any item in allAnswers array to retrive
+    // all the user-ids. The index 0 here is arbitrary.
+    var uids = []
+    var item = allAnswers[0]
+    for (uid in item) {
+      uids.push(uid)
+    }
+
+    for (var i = 0; i < voteResults.length; i++) {
+      for (var j = 0; j < uids.length; j++) {
+        var uid = uids[j]
+        voteResults[i][uid] = { vote: true }
+      }
+    }
+    console.log(voteResults)
+    return voteResults
+  }
+
+  getAnswersFromAllPlayers = () => {
+    database.ref(this.state.roomCode)
+      .child('players')
+      .on('value', snapshot => {
+        let allAnswers = Array(this.state.numCategories)
+        for (var j = 0; j < this.state.numCategories; j++) {
+          allAnswers[j] = {}
+        }
+
+        if (snapshot.exists()) {
+          snapshot.forEach(childSnapshot => {
+            var answers = childSnapshot.val().answers
+
+            for (var i = 0; i < answers.length; i++) {
+              const answer = answers[i]
+              allAnswers[i][childSnapshot.key] = answer
+            }
+          })
+        }
+
+        database.ref(this.state.roomCode)
+          .child('allAnswers')
+          .set(allAnswers)
+      })
   }
 
   componentWillUnmount = () => {
