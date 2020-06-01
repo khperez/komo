@@ -84,22 +84,8 @@ class App extends Component {
     database.ref(this.state.roomCode).once('value').then((snapshot) => {
       if (snapshot.exists()) {
         console.log(this.state.roomCode + " is a valid room");
-        database.ref(this.state.roomCode)
-          .child('numPlayers')
-          .once('value').then((snapshot) => {
-            let players = 0;
-            if (!snapshot.exists()) {
-              console.error('Non-host attempted to join a valid room without a host!')
-            } else {
-              players = snapshot.val() + 1;
-            }
-            this.setState({
-              numPlayers: players,
-            }, () => {
-              this.updateNumPlayersDb();
-              this.setValidRoom(true);
-            });
-          })
+        this.updateNumPlayersDbAndLocal();
+        this.setValidRoom(true);
         return this.state.roomCode
       } else {
         alert("This is not a valid room. Please try again");
@@ -135,10 +121,28 @@ class App extends Component {
     })
   }
 
-  updateNumPlayersDb = () => {
+  updateNumPlayersDbAndLocal = () => {
     const numPlayersRef = database.ref(this.state.roomCode+"/numPlayers")
     numPlayersRef.transaction((count) => {
-      return count + 1
+      let total = count + 1
+      this.setState({
+        numPlayers: total 
+      })
+      return total 
+    })
+  }
+
+  setHostLocal = () => {
+    this.setState({
+      isHost: true,
+    })
+  }
+
+  listenNumPlayersDb = () => {
+    database.ref(this.state.roomCode+"/numPlayers").on('value', (snapshot) => {
+      this.setState({
+        numPlayers: snapshot.val()
+      })
     })
   }
 
@@ -146,8 +150,10 @@ class App extends Component {
     this.generateRoomCode()
       .then(this.login()
         .then(this.createUser)
-          .then(this.updateNumPlayersDb)
-            .then(this.setHostDb))
+          .then(this.updateNumPlayersDbAndLocal)
+            .then(this.listenNumPlayersDb))
+              .then(this.setHostDb)
+                .then(this.setHostLocal)
     this.setState({
       isStartView: false,
       modalShowCreateGame: false,
@@ -179,13 +185,15 @@ class App extends Component {
     console.log("updateLobbyPlayers")
     const playersRef = database.ref(this.state.roomCode).child('players');
     playersRef.on('value', snapshot => {
-      const playerList = [];
-      snapshot.forEach(function(data) {
-        playerList.push(data.val().name);
-      });
-      this.setState({
-        players: playerList
-      }, this.setLobbyView);
+      if (snapshot.exists()) {
+        const playerList = [];
+        snapshot.forEach(function(data) {
+          playerList.push(data.val().name);
+        });
+        this.setState({
+          players: playerList
+        }, this.setLobbyView);
+      }
     }, function(err) {
       alert(`players read failed: ${err.code}`)
     });
@@ -343,6 +351,7 @@ class App extends Component {
   }
 
   onSubmitAnswers = () => {
+    console.log("onSubmitAnswers")
     this.setState({
       isAwaitResultsView: true,
       isGameView: false,
