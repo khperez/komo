@@ -35,6 +35,7 @@ class App extends Component {
       isValidRoom: null,
       numCategories: 0,
       players: [],
+      isAnswerSubmitted: true,
       submittedPlayers: [],
       modalShowCreateGame: false,
       modalShowJoinGame: false,
@@ -42,6 +43,7 @@ class App extends Component {
       categoryLetter: null,
       timeRemaining: 0,
       timerShow: false,
+      isGameOver: false,
     };
   }
 
@@ -235,7 +237,10 @@ class App extends Component {
         isGameView: false,
         isVotingView: true,
       })
-      this.setAnswersDb();
+      if (!this.state.isGameOver) {
+        this.setAnswersDb();
+      }
+      clearInterval(this.state.countdownHandler);
     }
     this.setState({
       timeRemaining: timeRemaining - 1
@@ -247,13 +252,15 @@ class App extends Component {
     database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
     database.ref(this.state.roomCode).child('isGameStarted').set(true);
     database.ref(this.state.roomCode).child('players').off();
-    setInterval(this.tick, 1000);
+    database.ref(this.state.roomCode).child('timerValue').set(this.state.timeRemaining);
+    var countdownHandler = setInterval(this.tick, 1000)
     this.setState({
       isGameView: true,
       isHostView: false,
       isJoinView: false,
       isLobbyView: false,
       timerShow: true,
+      countdownHandler: countdownHandler,
     })
   }
 
@@ -267,6 +274,9 @@ class App extends Component {
     let val = event.target.value;
     if (name === "roomCode") {
       val = val.toUpperCase();
+    }
+    if (name === "timeRemaining") {
+      val = parseInt(val, 10);
     }
     this.setState({
       [name]: val
@@ -351,14 +361,35 @@ class App extends Component {
         if (snapshot.val() === true) {
           database.ref(this.state.roomCode).child('players').off();
           this.showGameView();
-        }
+        } 
       });
+    database.ref(this.state.roomCode).child('timerValue')
+      .on('value', (snapshot) => {
+        if (snapshot.val()) {
+          console.log("timeRemaining: " + snapshot.val())
+          this.setState({
+            timeRemaining: snapshot.val(),
+            timerShow: true,
+          }, () => {
+            setInterval(this.tick, 1000);
+          })
+        }
+      })
+    database.ref(this.state.roomCode).child('isGameOver')
+      .on('value', (snapshot) => {
+        clearInterval(this.countdownHandler)
+        this.setState({
+          isAwaitResultsView: false,
+          isVotingView: true,
+          timerShow: false,
+          isGameOver: snapshot.val(),
+        })
+      })
   }
 
   incrementSubmittedCounter = () => {
     var submittedCounterRef = database.ref(this.state.roomCode+"/submittedCounter");
     submittedCounterRef.transaction(function(counter) {
-      // If users/ada/rank has never been set, currentRank will be `null`.
       return counter + 1;
     });
   }
@@ -399,6 +430,7 @@ class App extends Component {
       isAwaitResultsView: true,
       isGameView: false,
       isLobbyView: false,
+      isAnswerSubmitted: true,
     });
     this.setAnswersDb();
     this.incrementSubmittedCounter();
@@ -408,6 +440,14 @@ class App extends Component {
         .on('value', (snapshot) => {
           if (snapshot.val() === this.state.numPlayers) {
             console.log("All players have submitted their answers")
+            database.ref(this.state.roomCode).child('isGameOver')
+              .set(true)
+            clearInterval(this.state.countdownHandler)
+            this.setState({
+              timerShow: false,
+              isAwaitResultsView: false,
+              isVotingView: true,
+            })
           }
         })
     }
