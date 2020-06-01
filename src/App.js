@@ -41,7 +41,7 @@ class App extends Component {
       modalShowJoinGame: false,
       localCategories: [],
       categoryLetter: null,
-      timeRemaining: 0,
+      timeRemaining: null,
       timerShow: false,
       isGameOver: false,
     };
@@ -235,11 +235,9 @@ class App extends Component {
       this.setState({
         timerShow: false,
         isGameView: false,
-        isVotingView: true,
+        isAwaitResultsView: false,
       })
-      if (!this.state.isGameOver) {
-        this.setAnswersDb();
-      }
+      this.onSubmitAnswers();
       clearInterval(this.state.countdownHandler);
     }
     this.setState({
@@ -253,6 +251,21 @@ class App extends Component {
     database.ref(this.state.roomCode).child('isGameStarted').set(true);
     database.ref(this.state.roomCode).child('players').off();
     database.ref(this.state.roomCode).child('timerValue').set(this.state.timeRemaining);
+    database.ref(this.state.roomCode)
+      .child("submittedCounter")
+      .on('value', (snapshot) => {
+        if (snapshot.val() === this.state.numPlayers) {
+          console.log("All players have submitted their answers")
+          database.ref(this.state.roomCode).child('isGameOver')
+            .set(true)
+          clearInterval(this.state.countdownHandler)
+          this.setState({
+            isAwaitResultsView: false,
+            timerShow: false,
+            isVotingView: true,
+          })
+        }
+      })
     var countdownHandler = setInterval(this.tick, 1000)
     this.setState({
       isGameView: true,
@@ -377,13 +390,15 @@ class App extends Component {
       })
     database.ref(this.state.roomCode).child('isGameOver')
       .on('value', (snapshot) => {
-        clearInterval(this.countdownHandler)
-        this.setState({
-          isAwaitResultsView: false,
-          isVotingView: true,
-          timerShow: false,
-          isGameOver: snapshot.val(),
-        })
+        if (snapshot.val() === true) {
+          clearInterval(this.countdownHandler)
+          this.setState({
+            isAwaitResultsView: false,
+            timerShow: false,
+            isGameOver: snapshot.val(),
+            isVotingView: true,
+          })
+        }
       })
   }
 
@@ -434,23 +449,6 @@ class App extends Component {
     });
     this.setAnswersDb();
     this.incrementSubmittedCounter();
-    if (this.state.isHost) {
-      database.ref(this.state.roomCode)
-        .child("submittedCounter")
-        .on('value', (snapshot) => {
-          if (snapshot.val() === this.state.numPlayers) {
-            console.log("All players have submitted their answers")
-            database.ref(this.state.roomCode).child('isGameOver')
-              .set(true)
-            clearInterval(this.state.countdownHandler)
-            this.setState({
-              timerShow: false,
-              isAwaitResultsView: false,
-              isVotingView: true,
-            })
-          }
-        })
-    }
     database.ref(this.state.roomCode)
       .child('submittedPlayers')
       .push(this.state.username)
