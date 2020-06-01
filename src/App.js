@@ -9,7 +9,9 @@ import JoinForm from './components/forms/JoinForm';
 import CreateForm from './components/forms/CreateForm';
 import ResultView from './components/ResultView';
 import AwaitResultsView from './components/AwaitResultsView';
+import VotingView from './components/VotingView';
 import AdminView from './components/AdminView';
+import Timer from './components/Timer';
 
 class App extends Component {
   constructor(props) {
@@ -25,8 +27,9 @@ class App extends Component {
       isLobbyView: false,
       isJoinView: false,
       isGameView: false,
-      isResultViiew: false,
+      isResultView: false,
       isAwaitResultsView: false,
+      isVotingView: false,
       currentUser: null,
       username: null,
       isValidRoom: null,
@@ -37,6 +40,8 @@ class App extends Component {
       modalShowJoinGame: false,
       localCategories: [],
       categoryLetter: null,
+      timeRemaining: 0,
+      timerShow: false,
     };
   }
 
@@ -222,17 +227,33 @@ class App extends Component {
     }, this.sendStartSignal);
   }
 
+  tick = () => {
+    var timeRemaining = this.state.timeRemaining
+    if (timeRemaining === 0) {
+      this.setState({
+        timerShow: false,
+        isGameView: false,
+        isVotingView: true,
+      })
+      this.setAnswersDb();
+    }
+    this.setState({
+      timeRemaining: timeRemaining - 1
+    })
+  }
   sendStartSignal = () => {
     console.log('Category Letter = ' + this.state.categoryLetter);
     // Notify non-host players that the game is starting
     database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
     database.ref(this.state.roomCode).child('isGameStarted').set(true);
     database.ref(this.state.roomCode).child('players').off();
+    setInterval(this.tick, 1000);
     this.setState({
       isGameView: true,
       isHostView: false,
       isJoinView: false,
-      isLobbyView: false
+      isLobbyView: false,
+      timerShow: true,
     })
   }
 
@@ -350,13 +371,7 @@ class App extends Component {
     console.log("show voting view");
   }
 
-  onSubmitAnswers = () => {
-    console.log("onSubmitAnswers")
-    this.setState({
-      isAwaitResultsView: true,
-      isGameView: false,
-      isLobbyView: false,
-    });
+  setAnswersDb = () => {
     // Push the user-provided answers to the database
     let answers = []
     for (var i = 0; i < this.state.categoriesList.length; i++) {
@@ -364,21 +379,28 @@ class App extends Component {
         value: this.state.categoriesList[i].answer,
         valid: false
       }
-
       if (answer.value.toUpperCase().startsWith(this.state.categoryLetter)) {
         answer.valid = true
       }
       answers.push(answer)
     }
-
     console.log('[database] setting answers ' + answers.map(ans => ans.value))
-
     let uid = auth.currentUser.uid;
     database.ref(this.state.roomCode)
       .child('players')
       .child(uid)
       .child('answers')
       .set(answers);
+  }
+
+  onSubmitAnswers = () => {
+    console.log("onSubmitAnswers")
+    this.setState({
+      isAwaitResultsView: true,
+      isGameView: false,
+      isLobbyView: false,
+    });
+    this.setAnswersDb();
     this.incrementSubmittedCounter();
     if (this.state.isHost) {
       database.ref(this.state.roomCode)
@@ -421,6 +443,10 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        {this.state.timerShow
+          &&
+          <Timer timeRemaining={this.state.timeRemaining}/>
+        }
         {this.state.isStartView
           &&
           <StartView
@@ -455,6 +481,10 @@ class App extends Component {
         {this.state.isAwaitResultsView
           &&
           <AwaitResultsView players={this.state.submittedPlayers}/>
+        }
+        {this.state.isVotingView
+          &&
+          <VotingView/>
         }
         {this.state.isResultView
           &&

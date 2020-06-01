@@ -21,6 +21,11 @@ function NumCategoriesForm({changeHandler, submitHandler}) {
           label="number of categories"
           variant="outlined"
           name="numCategories"/>
+        <TextField onChange={changeHandler} 
+          id="outlined-basic"
+          label="timer in seconds"
+          variant="outlined"
+          name="timeRemaining"/>
         <p>
         <Button type="submit" label="login" variant="contained">
           Start Game
