@@ -563,6 +563,7 @@ class App extends Component {
             onJoin={this.joinGame}
           />
         }
+        <div className="body">
         {this.state.isHostView
           &&
           <HostView code={this.state.roomCode}
@@ -578,6 +579,7 @@ class App extends Component {
             roomCode={this.state.roomCode}
           />
         }
+        </div>
         {this.state.isGameView
           &&
           <GameView

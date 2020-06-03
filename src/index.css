@@ -6,12 +6,13 @@
   justify-content: center;
   overflow: auto;
   font-family: 'Roboto', sans-serif;
+  background: white;
 }
 
 .App-title {
   display: flex;
   font-family: 'Catamaran', sans-serif;
-  color: #EC4E20;
+  color: #36BFAA;
   margin: 0px 5px;
   font-size: 20vh;
 }
@@ -60,7 +61,39 @@
 }
 
 .Room-code-id {
-  color: #EC4E20;
+  color: #36BFAA;
   margin: 0px 5px;
-  font-size: 9vh;
+  font-size: 7vh;
+  border-style: dashed;
+  /* background: #262730; */
+  border-color: #262730;
+  border-width: thin;
+  padding: 3px;
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 70vw;
+}
+
+.playerList {
+  list-style: none;
+  padding-left: 0;
+}
+
+.player {
+  background: #343C5B;
+  border-radius: 10px;
+  color: white;
+  padding: 10px 10px 10px 20px;
+  margin: 10px;
+}
+
+.Host-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 25vh;
 }
