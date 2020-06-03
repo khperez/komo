@@ -1,7 +1,6 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Timer from './Timer';
 
 export default function GameView({categories, categoryLetter, onChange, onSubmit}) {
     const categoryList = categories.map((category) =>
@@ -13,11 +12,12 @@ export default function GameView({categories, categoryLetter, onChange, onSubmit
         </Form>
     );
     return (
-        <div>
-            <h1>Game View</h1>
-            <h2>Letter: {categoryLetter}</h2>
-            {categoryList}
-            <Button onClick={onSubmit}>Submit</Button>
+        <div className="Game-form">
+            <div>
+                {categoryList}
+                <Button onClick={onSubmit}>Submit</Button>
+            </div>
+            <div className="letter">{categoryLetter}</div>
         </div>
     )
 }

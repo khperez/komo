@@ -97,3 +97,48 @@
   justify-content: space-evenly;
   height: 25vh;
 }
+
+.Timer-container {
+  height: 100vh;
+  background: #262730;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.timer {
+  font-size: 100px;
+  padding: 20px;
+  color: #776885;
+  width: 205px;
+  text-align: center;
+}
+
+.Game-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.Game-view {
+  display: flex;
+  height: 100%;
+}
+
+.letter {
+  color: #73C2BE;
+  background:  #32716E;
+  font-size: 100px;
+  text-align: center;
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  height: 100vh;
+  width: 15vh;
+  padding: 20px;
+}
+
+.Game-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}

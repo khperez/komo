@@ -24,7 +24,9 @@ function NumCategoriesForm({changeHandler, submitHandler}) {
             <MenuItem value={30}>Thirty</MenuItem>
           </Select>
           </div> */}
-          <Form.Group className="Host-form">
+          <Form.Group 
+            className="Host-form"
+            onChange={changeHandler}>
             <Form.Control
             placeholder="number of categories"
             name="numCategories" />

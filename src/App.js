@@ -552,10 +552,6 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        {this.state.timerShow
-          &&
-          <Timer timeRemaining={this.state.timeRemaining}/>
-        }
         {this.state.isStartView
           &&
           <StartView
@@ -580,6 +576,14 @@ class App extends Component {
           />
         }
         </div>
+        <div className="Game-container">
+        {this.state.timerShow
+          &&
+          <div className="Timer-container">
+            <Timer timeRemaining={this.state.timeRemaining}/>
+          </div>
+        }
+        {/* <AdminView onClick={this.onClickAdminView} /> */}
         {this.state.isGameView
           &&
           <GameView
@@ -587,8 +591,10 @@ class App extends Component {
             categoryLetter={this.state.categoryLetter}
             onChange={this.onChangeAnswer}
             onSubmit={this.onSubmitAnswers}
+            className="Game-view"
           />
         }
+        </div>
         {this.state.isAwaitResultsView
           &&
           <AwaitResultsView players={this.state.submittedPlayers}/>
@@ -613,7 +619,6 @@ class App extends Component {
           onSubmit={this.submitJoinForm}
           onChange={this.changeHandler}
         />
-        <AdminView onClick={this.onClickAdminView} />
       </div>
     );
   }
