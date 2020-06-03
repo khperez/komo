@@ -113,7 +113,7 @@ class App extends Component {
 
   createUser = (uid) => {
     database.ref(this.state.roomCode).child('players').child(uid).child('name').set(this.state.username);
-    return uid 
+    return uid
   }
 
   createGame = () => {
@@ -133,9 +133,9 @@ class App extends Component {
     numPlayersRef.transaction((count) => {
       let total = count + 1
       this.setState({
-        numPlayers: total 
+        numPlayers: total
       })
-      return total 
+      return total
     })
   }
 
@@ -374,7 +374,7 @@ class App extends Component {
         if (snapshot.val() === true) {
           database.ref(this.state.roomCode).child('players').off();
           this.showGameView();
-        } 
+        }
       });
     database.ref(this.state.roomCode).child('timerValue')
       .on('value', (snapshot) => {
