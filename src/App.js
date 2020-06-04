@@ -71,12 +71,18 @@ class App extends Component {
   }
 
   onChangeVoteCheckbox = (categoryId, uid, event) => {
-    // FIXME update voteResults using setState
-    console.log(categoryId)
-    console.log(this.state.categoriesList)
+    // Preferred way to invert a boolean inside an object inside an array:
+    // https://stackoverflow.com/a/49502115
+    let voteResults = [...this.state.voteResults]
+    let item = {...voteResults[categoryId]}
+    item[uid] = !item[uid]
+    voteResults[categoryId] = item
 
-    console.log("onChange vote: " + this.state.categoriesList[categoryId].name
-                + " / " + uid)
+    this.setState({
+      voteResults
+    }, () => {
+      console.log(this.state.voteResults)
+    })
   }
 
   generateRoomCode = async (length = 4) => {
@@ -420,6 +426,13 @@ class App extends Component {
     });
   }
 
+  incrementNumPlayersVoted = () => {
+      var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
+      numPlayersVotedRef.transaction(function(counter) {
+        return counter + 1;
+      });
+    }
+
   calculateResults = () => {
     console.log("host is calculating results");
   }
@@ -448,6 +461,20 @@ class App extends Component {
       .child(uid)
       .child('answers')
       .set(answers)
+      .then(() => {return true});
+  }
+
+  setVotesDb = async () => {
+    // Push the user-provided votes to the database
+    const votes = this.state.voteResults
+    console.log('[database] setting votes')
+    console.log(votes)
+    let uid = auth.currentUser.uid;
+    database.ref(this.state.roomCode)
+      .child('players')
+      .child(uid)
+      .child('votes')
+      .set(votes)
       .then(() => {return true});
   }
 
@@ -487,11 +514,6 @@ class App extends Component {
             this.setState({
               isVotingView: true,
             })
-
-            // FIXME These print statements can be removed when ready
-            // They're left in for now to help with testing.
-            console.log(this.state.allAnswers)
-            console.log(this.state.voteResults)
           })
 
           database.ref(this.state.roomCode)
@@ -499,6 +521,14 @@ class App extends Component {
             .off()
         }
       })
+  }
+
+  onSubmitVotes = () => {
+    this.setState({
+      isResultView: true,
+      isVotingView: false
+    })
+    this.setVotesDb().then(this.incrementNumPlayersVoted())
   }
 
   getVoteResults = (allAnswers) => {
@@ -618,8 +648,11 @@ class App extends Component {
           &&
           <VotingView
             categories={this.state.categoriesList}
+            categoryLetter={this.state.categoryLetter}
             allAnswers={this.state.allAnswers}
             onChange={this.onChangeVoteCheckbox}
+            voteResults={this.state.voteResults}
+            onSubmitVotes={this.onSubmitVotes}
           />
         }
         {this.state.isResultView
