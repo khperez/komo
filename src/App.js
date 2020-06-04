@@ -70,6 +70,15 @@ class App extends Component {
     this.setState({categoriesList: newCategories}) // set the new state
   }
 
+  onChangeVoteCheckbox = (categoryId, uid, event) => {
+    // FIXME update voteResults using setState
+    console.log(categoryId)
+    console.log(this.state.categoriesList)
+
+    console.log("onChange vote: " + this.state.categoriesList[categoryId].name
+                + " / " + uid)
+  }
+
   generateRoomCode = async (length = 4) => {
     var result           = '';
     var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ12345679';
@@ -82,7 +91,7 @@ class App extends Component {
     }, () => {
       this.setValidRoom(true)
     }); // OnAuthStateChanged expects a valid this.state.roomCode for host,
-                    // so don't login until setState is completed
+        // so don't login until setState is completed
     return result
   }
 
@@ -258,13 +267,12 @@ class App extends Component {
       .on('value', (snapshot) => {
         if (snapshot.val() === this.state.numPlayers) {
           console.log("All players have submitted their answers")
-          database.ref(this.state.roomCode).child('isGameOver')
-            .set(true)
+          this.getAnswersFromAllPlayers()
+          database.ref(this.state.roomCode).child('isGameOver').set(true)
           clearInterval(this.state.countdownHandler)
           this.setState({
             isAwaitResultsView: false,
             timerShow: false,
-            isVotingView: true,
           })
         }
       })
@@ -382,23 +390,24 @@ class App extends Component {
       .on('value', (snapshot) => {
         if (snapshot.val()) {
           console.log("timeRemaining: " + snapshot.val())
+
+          var countdownHandler = setInterval(this.tick, 1000)
+
           this.setState({
             timeRemaining: snapshot.val(),
             timerShow: true,
-          }, () => {
-            setInterval(this.tick, 1000);
+            countdownHandler: countdownHandler
           })
         }
       })
     database.ref(this.state.roomCode).child('isGameOver')
       .on('value', (snapshot) => {
         if (snapshot.val() === true) {
-          clearInterval(this.countdownHandler)
+          clearInterval(this.state.countdownHandler)
           this.setState({
             isAwaitResultsView: false,
             timerShow: false,
             isGameOver: snapshot.val(),
-            isVotingView: true,
           })
         }
       })
@@ -471,11 +480,19 @@ class App extends Component {
       .child('allAnswers')
       .on('value', snapshot => {
         if (snapshot.exists()) {
-          console.log(snapshot.val())
-
           this.setState({
+            allAnswers: snapshot.val(),
             voteResults: this.getVoteResults(snapshot.val())
-          }, this.setupVoteView)
+          }, () => {
+            this.setState({
+              isVotingView: true,
+            })
+
+            // FIXME These print statements can be removed when ready
+            // They're left in for now to help with testing.
+            console.log(this.state.allAnswers)
+            console.log(this.state.voteResults)
+          })
 
           database.ref(this.state.roomCode)
             .child('allAnswers')
@@ -484,11 +501,6 @@ class App extends Component {
       })
   }
 
-  setupVoteView = () => {
-
-  }
-
-  // FIXME give better func name
   getVoteResults = (allAnswers) => {
     var voteResults = Array(allAnswers.length)
     for (var k = 0; k < allAnswers.length; k++) {
@@ -509,7 +521,7 @@ class App extends Component {
         voteResults[i][uid] = { vote: true }
       }
     }
-    console.log(voteResults)
+
     return voteResults
   }
 
@@ -603,7 +615,11 @@ class App extends Component {
         }
         {this.state.isVotingView
           &&
-          <VotingView/>
+          <VotingView
+            categories={this.state.categoriesList}
+            allAnswers={this.state.allAnswers}
+            onChange={this.onChangeVoteCheckbox}
+          />
         }
         {this.state.isResultView
           &&
