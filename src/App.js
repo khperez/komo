@@ -35,7 +35,7 @@ class App extends Component {
       isValidRoom: null,
       numCategories: 0,
       players: [],
-      isAnswerSubmitted: true,
+      isAnswerSubmitted: false,
       submittedPlayers: [],
       modalShowCreateGame: false,
       modalShowJoinGame: false,
@@ -237,7 +237,9 @@ class App extends Component {
         isGameView: false,
         isAwaitResultsView: false,
       })
-      this.onSubmitAnswers();
+      if (!this.state.isAnswerSubmitted) {
+        this.onSubmitAnswers();
+      }
       clearInterval(this.state.countdownHandler);
     }
     this.setState({
