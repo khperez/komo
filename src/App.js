@@ -419,7 +419,7 @@ class App extends Component {
     console.log("show voting view");
   }
 
-  setAnswersDb = () => {
+  setAnswersDb = async () => {
     // Push the user-provided answers to the database
     let answers = []
     for (var i = 0; i < this.state.categoriesList.length; i++) {
@@ -438,7 +438,8 @@ class App extends Component {
       .child('players')
       .child(uid)
       .child('answers')
-      .set(answers);
+      .set(answers)
+      .then(() => {return true});
   }
 
   onSubmitAnswers = () => {
@@ -449,8 +450,7 @@ class App extends Component {
       isLobbyView: false,
       isAnswerSubmitted: true,
     });
-    this.setAnswersDb();
-    this.incrementSubmittedCounter();
+    this.setAnswersDb().then(this.incrementSubmittedCounter())
     database.ref(this.state.roomCode)
       .child('submittedPlayers')
       .push(this.state.username)
