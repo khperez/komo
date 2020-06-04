@@ -511,13 +511,14 @@ class App extends Component {
     // all the user-ids. The index 0 here is arbitrary.
     var uids = []
     var item = allAnswers[0]
+    var uid = null
     for (uid in item) {
       uids.push(uid)
     }
 
     for (var i = 0; i < voteResults.length; i++) {
       for (var j = 0; j < uids.length; j++) {
-        var uid = uids[j]
+        uid = uids[j]
         voteResults[i][uid] = { vote: true }
       }
     }

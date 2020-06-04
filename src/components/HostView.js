@@ -1,9 +1,5 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
 import Form from "react-bootstrap/Form";
 
 function NumCategoriesForm({changeHandler, submitHandler}) {
