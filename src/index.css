@@ -142,3 +142,22 @@
   flex-direction: row;
   justify-content: flex-start;
 }
+
+a.Github-link:link {
+  color: rgb(193, 193, 193);
+}
+
+a.Github-link:hover {
+  text-decoration: none;
+}
+
+.Start-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Made-by {
+  text-align: center;
+}
