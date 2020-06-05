@@ -44,6 +44,7 @@ class App extends Component {
       timeRemaining: null,
       timerShow: false,
       isGameOver: false,
+      scores: {},
     };
   }
 
@@ -427,18 +428,10 @@ class App extends Component {
   }
 
   incrementNumPlayersVoted = () => {
-      var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
-      numPlayersVotedRef.transaction(function(counter) {
-        return counter + 1;
-      });
-    }
-
-  calculateResults = () => {
-    console.log("host is calculating results");
-  }
-
-  showVotingView = () => {
-    console.log("show voting view");
+    var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
+    numPlayersVotedRef.transaction(function(counter) {
+      return counter + 1;
+    });
   }
 
   setAnswersDb = async () => {
@@ -468,7 +461,6 @@ class App extends Component {
     // Push the user-provided votes to the database
     const votes = this.state.voteResults
     console.log('[database] setting votes')
-    console.log(votes)
     let uid = auth.currentUser.uid;
     database.ref(this.state.roomCode)
       .child('players')
@@ -523,12 +515,80 @@ class App extends Component {
       })
   }
 
+  calculateScores = (allVotes) => {
+    let are_scores_initialized = false
+    let scores = {}
+
+    for (var i = 0; i < allVotes.length; i++) {
+      var question = allVotes[i]
+
+      const uids = Reflect.ownKeys(question) // [ uid_0, uid_1, ..]
+
+      if (!are_scores_initialized) {
+        for (var k = 0; k < uids.length; k++){
+          const uid = uids[k]
+          scores[uid] = 0
+        }
+
+        are_scores_initialized = true
+      }
+
+      for (var j = 0; j < uids.length; j++) {
+        const uid = uids[j]
+        const votes = question[uid]
+
+        var vote_count = 0
+
+        for (var key in votes) {
+          const vote = votes[key]
+
+          if (vote === true) {
+            vote_count = vote_count + 1
+          } else if (vote === false) {
+            vote_count = vote_count - 1
+          } else {
+            console.warn('Unexpected vote value. Must be true or false.')
+          }
+        }
+
+        // If there are more YES vote than NO vote, add 1 point
+        if (vote_count > 0) {
+          scores[uid] = scores[uid] + 1
+        }
+      }
+    }
+
+    return scores
+  }
+
   onSubmitVotes = () => {
     this.setState({
       isResultView: true,
       isVotingView: false
     })
     this.setVotesDb().then(this.incrementNumPlayersVoted())
+
+    if (this.state.isHost) {
+      var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
+      numPlayersVotedRef.on('value', (snapshot) => {
+
+        if (snapshot.val() === this.state.numPlayers) {
+
+          console.log("All players have submitted their votes")
+
+          this.getVotesFromAllPlayers().then(() => {
+            const scores = this.calculateScores(this.state.allVotes)
+            this.setState({
+              scores
+            }, () => {
+              // FIXME this can be removed later, leaving it in for now to
+              // help with debugging
+              console.log(this.state.scores)
+            })
+          })
+        }
+      })
+    }
   }
 
   getVoteResults = (allAnswers) => {
@@ -549,7 +609,11 @@ class App extends Component {
     for (var i = 0; i < voteResults.length; i++) {
       for (var j = 0; j < uids.length; j++) {
         uid = uids[j]
-        voteResults[i][uid] = { vote: true }
+        if (allAnswers[i][uid].valid) {
+          voteResults[i][uid] = true
+        } else {
+          voteResults[i][uid] = false
+        }
       }
     }
 
@@ -579,6 +643,35 @@ class App extends Component {
         database.ref(this.state.roomCode)
           .child('allAnswers')
           .set(allAnswers)
+      })
+  }
+
+  getVotesFromAllPlayers = async () => {
+    // This function should only be called _after_ we are certain
+    // all the votes have been submitted!
+    database.ref(this.state.roomCode)
+      .child('players')
+      .once('value')
+      .then(snapshot => {
+        let allVotes = Array(this.state.numCategories)
+        for (var j = 0; j < this.state.numCategories; j++) {
+          allVotes[j] = {}
+        }
+
+        if (snapshot.exists()) {
+          snapshot.forEach(childSnapshot => {
+            var votes = childSnapshot.val().votes
+
+            for (var i = 0; i < votes.length; i++) {
+              const answer = votes[i]
+              allVotes[i][childSnapshot.key] = answer
+            }
+          })
+        }
+
+        this.setState({ allVotes })
+
+        return true
       })
   }
 
@@ -657,7 +750,9 @@ class App extends Component {
         }
         {this.state.isResultView
           &&
-          <ResultView/>
+          <ResultView
+            scores={this.state.scores}
+          />
         }
         <CreateForm
           show={this.state.modalShowCreateGame}
