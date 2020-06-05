@@ -81,8 +81,6 @@ class App extends Component {
 
     this.setState({
       voteResults
-    }, () => {
-      console.log(this.state.voteResults)
     })
   }
 
@@ -461,6 +459,7 @@ class App extends Component {
     // Push the user-provided votes to the database
     const votes = this.state.voteResults
     console.log('[database] setting votes')
+    console.log(votes)
     let uid = auth.currentUser.uid;
     database.ref(this.state.roomCode)
       .child('players')
@@ -568,6 +567,7 @@ class App extends Component {
     })
     this.setVotesDb().then(this.incrementNumPlayersVoted())
 
+    // The hosts calculates the scores and uploads them
     if (this.state.isHost) {
       var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
       numPlayersVotedRef.on('value', (snapshot) => {
@@ -577,18 +577,52 @@ class App extends Component {
           console.log("All players have submitted their votes")
 
           this.getVotesFromAllPlayers().then(() => {
+            // FIXME allVotes is shaky for now, print it out!
+            console.log(this.state.allVotes)
             const scores = this.calculateScores(this.state.allVotes)
-            this.setState({
-              scores
-            }, () => {
-              // FIXME this can be removed later, leaving it in for now to
-              // help with debugging
-              console.log(this.state.scores)
-            })
-          })
+
+            database.ref(this.state.roomCode)
+              .child('players')
+              .on('value', snapshot => {
+                if (snapshot.exists()) {
+
+                  // key: uid, value: name
+                  var uidToName = {}
+
+                  snapshot.forEach(childSnapshot => {
+                    uidToName[childSnapshot.key] = childSnapshot.val().name
+                  })
+                }
+
+                let newScores = {}
+                const uids = Reflect.ownKeys(scores)
+                for (let i = 0; i < uids.length; i++) {
+                  let uid = uids[i]
+                  newScores[uidToName[uid]] = scores[uid]
+                }
+
+                database.ref(this.state.roomCode)
+                  .child('scores')
+                  .set(newScores)
+              })
+         })
         }
       })
     }
+
+    // Everyone listens for the scores from Firebase (incl. host)
+    database.ref(this.state.roomCode)
+      .child('scores')
+      .on('value', snapshot => {
+        if(snapshot.exists()) {
+          const scores = snapshot.val()
+          this.setState({ scores })
+
+          // Don't need to listen for the scores from Firebase anymore
+          // after after we get the first valid query
+          database.ref(this.state.roomCode).child('score').off()
+        }
+      })
   }
 
   getVoteResults = (allAnswers) => {
@@ -654,17 +688,37 @@ class App extends Component {
       .once('value')
       .then(snapshot => {
         let allVotes = Array(this.state.numCategories)
-        for (var j = 0; j < this.state.numCategories; j++) {
-          allVotes[j] = {}
-        }
 
         if (snapshot.exists()) {
+
+          // Initialize allVotes properly!
+          // allVotes = [
+          //   {
+          //     uid_0: { uid_0: t/f, uid_1: t/f, ...} ,
+          //     uid_1: { uid_0: t/f, uid_1: t/f, ...} ,
+          //     ...
+          //   },
+          //   ...
+          // ]
+          for (let j = 0; j < this.state.numCategories; j++) {
+            allVotes[j] = {}
+
+            snapshot.forEach(childSnapshot => {
+              allVotes[j][childSnapshot.key] = {}
+            })
+          }
+
           snapshot.forEach(childSnapshot => {
             var votes = childSnapshot.val().votes
 
-            for (var i = 0; i < votes.length; i++) {
-              const answer = votes[i]
-              allVotes[i][childSnapshot.key] = answer
+            for (let i = 0; i < votes.length; i++) {
+              const answers = votes[i]
+              const uids = Reflect.ownKeys(answers)
+
+              for (let k = 0; k < uids.length; k++) {
+                const uid = uids[k]
+                allVotes[i][uid][childSnapshot.key] = answers[uid]
+              }
             }
           })
         }
