@@ -16,7 +16,7 @@ export default function ResultView({ scores }) {
             <div>
                 <h1>Result View</h1>
                 { keys.map(key => {
-                    return <h2 key={key}>uid: {key} score: {scores[key]}</h2>
+                    return <h2 key={key}>name: {key} score: {scores[key]}</h2>
                 })}
             </div>
         )
