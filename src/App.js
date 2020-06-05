@@ -237,7 +237,7 @@ class App extends Component {
 
   generateCategoryLetter = () => {
     var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ';
+    var characters       = 'ABCDEFGHIJKLMNPRSTW';
     result = characters.charAt(Math.floor(Math.random() * characters.length));
     this.setState({
       categoryLetter: result,
