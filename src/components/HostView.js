@@ -7,19 +7,6 @@ function NumCategoriesForm({changeHandler, submitHandler}) {
       <div className="hostView">
         <form onSubmit={submitHandler}
           autoComplete="off">
-          {/* <div>
-          <InputLabel id="demo-simple-select-label">Age</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={age}
-            onChange={handleChange}
-          >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
-          </Select>
-          </div> */}
           <Form.Group 
             className="Host-form"
             onChange={changeHandler}>
@@ -47,7 +34,6 @@ export default function HostView (
   }) {
   return (
     <div>
-      <div className="Room-code-host">You are the host</div>
       <h1>Game Settings</h1>
       <NumCategoriesForm
         changeHandler={changeHandler}

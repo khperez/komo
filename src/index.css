@@ -53,7 +53,8 @@
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  flex-direction: column;
+  flex-direction: row;
+  font-size: 5vh;
 }
 
 .Room-code-host{
@@ -63,7 +64,7 @@
 .Room-code-id {
   color: #36BFAA;
   margin: 0px 5px;
-  font-size: 7vh;
+  font-size: 5vh;
   border-style: dashed;
   /* background: #262730; */
   border-color: #262730;

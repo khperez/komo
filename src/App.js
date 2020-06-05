@@ -653,6 +653,7 @@ class App extends Component {
             onChange={this.onChangeVoteCheckbox}
             voteResults={this.state.voteResults}
             onSubmitVotes={this.onSubmitVotes}
+            numPlayers={this.state.numPlayers}
           />
         }
         {this.state.isResultView
