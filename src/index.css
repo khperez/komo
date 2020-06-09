@@ -15,6 +15,7 @@
   color: #36BFAA;
   margin: 0px 5px;
   font-size: 20vh;
+  text-align: center;
 }
 
 .Button-create{
@@ -149,6 +150,10 @@ a.Github-link:link {
 
 a.Github-link:hover {
   text-decoration: none;
+}
+
+a.Github-link:visited {
+  color: rgb(193, 193, 193);
 }
 
 .Start-view {

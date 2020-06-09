@@ -12,10 +12,17 @@ export default function VotingView({
     var onlyAnswers = [];
     var allAnswersOne = allAnswers[category.id]
     Object.keys(allAnswersOne).map(uid => {
-      onlyAnswers.push(allAnswersOne[uid])
+      onlyAnswers.push(allAnswersOne[uid].value.toLowerCase())
     })
+    onlyAnswers = [...new Set(findDuplicates(onlyAnswers))]
+    if (onlyAnswers.length != 0 || onlyAnswers !== undefined) {
+      Object.keys(allAnswersOne).map(uid => {
+        if (onlyAnswers.includes(allAnswersOne[uid].value.toLowerCase())) {
+          allAnswersOne[uid].valid = false
+        }
+      })
+    }
     debugger
-    console.log(JSON.stringify(onlyAnswers))
   })
 
   var checkboxes =
