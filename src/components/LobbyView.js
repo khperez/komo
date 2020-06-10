@@ -12,6 +12,9 @@ export default function LobbyView({players, roomCode}) {
           {roomCode}
         </span>
       </div>
+      <div className="Lobby-players-connected">
+        Players connected: {players.length} 
+      </div>
       <ul className="playerList">
         {playerList}
       </ul>

@@ -22,7 +22,6 @@ export default function VotingView({
         }
       })
     }
-    debugger
   })
 
   var checkboxes =

@@ -43,6 +43,10 @@
   align-items: center;
 }
 
+.Host-view-settings {
+  font-size: 30px;
+}
+
 .Join-view {
   display: flex;
   flex-direction: column;
@@ -55,17 +59,17 @@
   align-items: center;
   justify-content: space-evenly;
   flex-direction: row;
-  font-size: 5vh;
+  font-size: 30px;
 }
 
 .Room-code-host{
-  font-size: 4vh;
+  font-size: 30px;
 }
 
 .Room-code-id {
   color: #36BFAA;
   margin: 0px 5px;
-  font-size: 5vh;
+  font-size: 30px;
   border-style: dashed;
   /* background: #262730; */
   border-color: #262730;
@@ -73,11 +77,11 @@
   padding: 3px;
 }
 
-.body {
+.Host-lobby-view {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  width: 70vw;
+  width: 50vw;
+  justify-content: space-around;
 }
 
 .playerList {
@@ -193,4 +197,8 @@ a.Github-link:visited {
   border-radius: 10px;
   color: white;
   padding: 5px 10px;
+}
+
+.Lobby-players-connected {
+  text-align: center;
 }

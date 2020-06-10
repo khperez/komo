@@ -34,7 +34,7 @@ export default function HostView (
   }) {
   return (
     <div>
-      <h1>Game Settings</h1>
+      <div className="Host-view-settings">Game Settings</div>
       <NumCategoriesForm
         changeHandler={changeHandler}
         submitHandler={submitHandler}/>
