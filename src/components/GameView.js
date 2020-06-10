@@ -2,6 +2,10 @@ import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
+function onSubmit(event) {
+    event.preventDefault();
+}
+
 export default function GameView({categories, categoryLetter, onChange, onSubmit}) {
     const categoryList = categories.map((category) =>
         <Form onChange={onChange.bind(this, category.id)} key={category.id}>

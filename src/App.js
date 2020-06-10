@@ -89,14 +89,14 @@ class App extends Component {
     var characters       = 'ABCDEFGHIJKLMNPQRSTUVWXYZ12345679';
     var charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
-       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     this.setState({
       roomCode: result,
     }, () => {
       this.setValidRoom(true)
     }); // OnAuthStateChanged expects a valid this.state.roomCode for host,
-        // so don't login until setState is completed
+    // so don't login until setState is completed
     return result
   }
 
@@ -117,7 +117,7 @@ class App extends Component {
 
   setHostDb = () => {
     database.ref(this.state.roomCode+"/host")
-      .set(this.state.currentUser)
+    .set(this.state.currentUser)
   }
 
   login = async () => {
@@ -169,12 +169,12 @@ class App extends Component {
 
   submitCreateForm = () => {
     this.generateRoomCode()
-      .then(this.login()
-        .then(this.createUser)
-          .then(this.updateNumPlayersDbAndLocal)
-            .then(this.listenNumPlayersDb))
-              .then(this.setHostDb)
-                .then(this.setHostLocal)
+    .then(this.login()
+    .then(this.createUser)
+    .then(this.updateNumPlayersDbAndLocal)
+    .then(this.listenNumPlayersDb))
+    .then(this.setHostDb)
+    .then(this.setHostLocal)
     this.setState({
       isStartView: false,
       modalShowCreateGame: false,
@@ -186,8 +186,8 @@ class App extends Component {
 
   submitJoinForm = () => {
     this.checkRoomCode()
-      .then(this.login()
-        .then(this.createUser))
+    .then(this.login()
+    .then(this.createUser))
     this.setState({
       isStartView: false,
       modalShowJoinGame: false,
@@ -231,43 +231,43 @@ class App extends Component {
           // and we're ready to start the game
           this.startGame()
         });
-    }
-  }
-
-  generateCategoryLetter = () => {
-    var result           = '';
-    var characters       = 'ABCDEFGHIJKLMNPRSTW';
-    result = characters.charAt(Math.floor(Math.random() * characters.length));
-    this.setState({
-      categoryLetter: result,
-    }, this.sendStartSignal);
-  }
-
-  tick = () => {
-    var timeRemaining = this.state.timeRemaining
-    if (timeRemaining === 0) {
-      this.setState({
-        timerShow: false,
-        isGameView: false,
-        isAwaitResultsView: false,
-      })
-      if (!this.state.isAnswerSubmitted) {
-        this.onSubmitAnswers();
       }
-      clearInterval(this.state.countdownHandler);
     }
-    this.setState({
-      timeRemaining: timeRemaining - 1
-    })
-  }
-  sendStartSignal = () => {
-    console.log('Category Letter = ' + this.state.categoryLetter);
-    // Notify non-host players that the game is starting
-    database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
-    database.ref(this.state.roomCode).child('isGameStarted').set(true);
-    database.ref(this.state.roomCode).child('players').off();
-    database.ref(this.state.roomCode).child('timerValue').set(this.state.timeRemaining);
-    database.ref(this.state.roomCode)
+
+    generateCategoryLetter = () => {
+      var result           = '';
+      var characters       = 'ABCDEFGHIJKLMNPRSTW';
+      result = characters.charAt(Math.floor(Math.random() * characters.length));
+      this.setState({
+        categoryLetter: result,
+      }, this.sendStartSignal);
+    }
+
+    tick = () => {
+      var timeRemaining = this.state.timeRemaining
+      if (timeRemaining === 0) {
+        this.setState({
+          timerShow: false,
+          isGameView: false,
+          isAwaitResultsView: false,
+        })
+        if (!this.state.isAnswerSubmitted) {
+          this.onSubmitAnswers();
+        }
+        clearInterval(this.state.countdownHandler);
+      }
+      this.setState({
+        timeRemaining: timeRemaining - 1
+      })
+    }
+    sendStartSignal = () => {
+      console.log('Category Letter = ' + this.state.categoryLetter);
+      // Notify non-host players that the game is starting
+      database.ref(this.state.roomCode).child('categoryLetter').set(this.state.categoryLetter);
+      database.ref(this.state.roomCode).child('isGameStarted').set(true);
+      database.ref(this.state.roomCode).child('players').off();
+      database.ref(this.state.roomCode).child('timerValue').set(this.state.timeRemaining);
+      database.ref(this.state.roomCode)
       .child("submittedCounter")
       .on('value', (snapshot) => {
         if (snapshot.val() === this.state.numPlayers) {
@@ -281,77 +281,77 @@ class App extends Component {
           })
         }
       })
-    var countdownHandler = setInterval(this.tick, 1000)
-    this.setState({
-      isGameView: true,
-      isHostView: false,
-      isJoinView: false,
-      isLobbyView: false,
-      timerShow: true,
-      countdownHandler: countdownHandler,
-    })
-  }
-
-  startGame = () => {
-    console.log("Game START");
-    this.generateCategoryLetter();
-  }
-
-  changeHandler = (event) => {
-    let name = event.target.name;
-    let val = event.target.value;
-    if (name === "roomCode") {
-      val = val.toUpperCase();
+      var countdownHandler = setInterval(this.tick, 1000)
+      this.setState({
+        isGameView: true,
+        isHostView: false,
+        isJoinView: false,
+        isLobbyView: false,
+        timerShow: true,
+        countdownHandler: countdownHandler,
+      })
     }
-    if (name === "timeRemaining") {
-      val = parseInt(val, 10);
-    }
-    this.setState({
-      [name]: val
-    });
-  }
 
-  setValidRoom = (value) => {
-    if (value === true) {
-      this.setModalShow(false);
-      if (this.state.isHost) {
-        this.setState({
-          isStartView: false,
-          isLobbyView: true,
-          isHostView: true,
-        });
-      } else {
-        this.setState({
-          isStartView: false,
-          isLobbyView: true,
-          isHostView: false,
-        }, this.waitForGameStart);
+    startGame = () => {
+      console.log("Game START");
+      this.generateCategoryLetter();
+    }
+
+    changeHandler = (event) => {
+      let name = event.target.name;
+      let val = event.target.value;
+      if (name === "roomCode") {
+        val = val.toUpperCase();
       }
-      this.updateLobbyPlayers();
+      if (name === "timeRemaining") {
+        val = parseInt(val, 10);
+      }
+      this.setState({
+        [name]: val
+      });
     }
-    this.setState({
-      isValidRoom: value,
-    })
-  }
 
-  submitHostFormHandler = (event) => {
-    event.preventDefault();
-    console.log("[local] setting " + this.state.numCategories + " categories");
-    this.setState({
-      categoriesList: GenerateRandomCategories(this.state.numCategories)
-    },
+    setValidRoom = (value) => {
+      if (value === true) {
+        this.setModalShow(false);
+        if (this.state.isHost) {
+          this.setState({
+            isStartView: false,
+            isLobbyView: true,
+            isHostView: true,
+          });
+        } else {
+          this.setState({
+            isStartView: false,
+            isLobbyView: true,
+            isHostView: false,
+          }, this.waitForGameStart);
+        }
+        this.updateLobbyPlayers();
+      }
+      this.setState({
+        isValidRoom: value,
+      })
+    }
+
+    submitHostFormHandler = (event) => {
+      event.preventDefault();
+      console.log("[local] setting " + this.state.numCategories + " categories");
+      this.setState({
+        categoriesList: GenerateRandomCategories(this.state.numCategories)
+      },
       this.setCategoriesDatabase
-    );
-  }
+      );
+    }
 
-  setModalShow = (value) => {
-    this.setState({
-      modalShow: value,
-    });
-  }
+    setModalShow = (value) => {
+      this.setState({
+        modalShow: value,
+      });
+    }
 
-  showGameView = () => {
-    database.ref(this.state.roomCode)
+    showGameView = () => {
+      database.ref(this.state.roomCode)
       .child('categoryLetter')
       .once('value').then((snapshot) => {
         if (snapshot.val() !== null) {
@@ -360,7 +360,7 @@ class App extends Component {
           })
         }
       })
-    database.ref(this.state.roomCode).child('categories')
+      database.ref(this.state.roomCode).child('categories')
       .on('value', snapshot => {
         if (snapshot.exists()) {
           let categories = []
@@ -376,22 +376,22 @@ class App extends Component {
       }, function(err) {
         alert(`isGameStart read failed: ${err.code}`)
       });
-    this.setState({
-      isGameView: true,
-      isLobbyView: false,
-    });
-  }
+      this.setState({
+        isGameView: true,
+        isLobbyView: false,
+      });
+    }
 
-  waitForGameStart = () => {
-    console.log("Waiting for host to start the game");
-    database.ref(this.state.roomCode).child('isGameStarted')
+    waitForGameStart = () => {
+      console.log("Waiting for host to start the game");
+      database.ref(this.state.roomCode).child('isGameStarted')
       .on('value', (snapshot) => {
         if (snapshot.val() === true) {
           database.ref(this.state.roomCode).child('players').off();
           this.showGameView();
         }
       });
-    database.ref(this.state.roomCode).child('timerValue')
+      database.ref(this.state.roomCode).child('timerValue')
       .on('value', (snapshot) => {
         if (snapshot.val()) {
           console.log("timeRemaining: " + snapshot.val())
@@ -405,7 +405,7 @@ class App extends Component {
           })
         }
       })
-    database.ref(this.state.roomCode).child('isGameOver')
+      database.ref(this.state.roomCode).child('isGameOver')
       .on('value', (snapshot) => {
         if (snapshot.val() === true) {
           clearInterval(this.state.countdownHandler)
@@ -416,85 +416,85 @@ class App extends Component {
           })
         }
       })
-  }
-
-  incrementSubmittedCounter = () => {
-    var submittedCounterRef = database.ref(this.state.roomCode+"/submittedCounter");
-    submittedCounterRef.transaction(function(counter) {
-      return counter + 1;
-    });
-  }
-
-  incrementNumPlayersVoted = () => {
-    var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
-    numPlayersVotedRef.transaction(function(counter) {
-      return counter + 1;
-    });
-  }
-
-  setAnswersDb = async () => {
-    // Push the user-provided answers to the database
-    let answers = []
-    for (var i = 0; i < this.state.categoriesList.length; i++) {
-      let answer = {
-        value: this.state.categoriesList[i].answer,
-        valid: false
-      }
-      if (answer.value.toUpperCase().startsWith(this.state.categoryLetter)) {
-        answer.valid = true
-      }
-      answers.push(answer)
     }
-    console.log('[database] setting answers ' + answers.map(ans => ans.value))
-    let uid = auth.currentUser.uid;
-    database.ref(this.state.roomCode)
+
+    incrementSubmittedCounter = () => {
+      var submittedCounterRef = database.ref(this.state.roomCode+"/submittedCounter");
+      submittedCounterRef.transaction(function(counter) {
+        return counter + 1;
+      });
+    }
+
+    incrementNumPlayersVoted = () => {
+      var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
+      numPlayersVotedRef.transaction(function(counter) {
+        return counter + 1;
+      });
+    }
+
+    setAnswersDb = async () => {
+      // Push the user-provided answers to the database
+      let answers = []
+      for (var i = 0; i < this.state.categoriesList.length; i++) {
+        let answer = {
+          value: this.state.categoriesList[i].answer,
+          valid: false
+        }
+        if (answer.value.toUpperCase().startsWith(this.state.categoryLetter)) {
+          answer.valid = true
+        }
+        answers.push(answer)
+      }
+      console.log('[database] setting answers ' + answers.map(ans => ans.value))
+      let uid = auth.currentUser.uid;
+      database.ref(this.state.roomCode)
       .child('players')
       .child(uid)
       .child('answers')
       .set(answers)
       .then(() => {return true});
-  }
+    }
 
-  setVotesDb = async () => {
-    // Push the user-provided votes to the database
-    const votes = this.state.voteResults
-    console.log('[database] setting votes')
-    console.log(votes)
-    let uid = auth.currentUser.uid;
-    database.ref(this.state.roomCode)
+    setVotesDb = async () => {
+      // Push the user-provided votes to the database
+      const votes = this.state.voteResults
+      console.log('[database] setting votes')
+      console.log(votes)
+      let uid = auth.currentUser.uid;
+      database.ref(this.state.roomCode)
       .child('players')
       .child(uid)
       .child('votes')
       .set(votes)
       .then(() => {return true});
-  }
+    }
 
-  onSubmitAnswers = () => {
-    console.log("onSubmitAnswers")
-    this.setState({
-      isAwaitResultsView: true,
-      isGameView: false,
-      isLobbyView: false,
-      isAnswerSubmitted: true,
-    });
-    this.setAnswersDb().then(this.incrementSubmittedCounter())
-    database.ref(this.state.roomCode)
+    onSubmitAnswers = () => {
+      console.log("onSubmitAnswers")
+      this.setState({
+        isAwaitResultsView: true,
+        isGameView: false,
+        isLobbyView: false,
+        isAnswerSubmitted: true,
+      });
+      this.setAnswersDb().then(this.incrementSubmittedCounter())
+      database.ref(this.state.roomCode)
       .child('submittedPlayers')
       .push(this.state.username)
-    database.ref(this.state.roomCode)
+      database.ref(this.state.roomCode)
       .child('submittedPlayers')
       .on('value', snapshot => {
-          var submittedPlayers = []
-          snapshot.forEach(function(data) {
-            submittedPlayers.push(data.val());
-          });
+        var submittedPlayers = []
+        snapshot.forEach(function(data) {
+          submittedPlayers.push(data.val());
+        });
 
-          this.setState({
-            submittedPlayers: submittedPlayers
-          })
+        this.setState({
+          submittedPlayers: submittedPlayers
+        })
       })
 
-    database.ref(this.state.roomCode)
+      database.ref(this.state.roomCode)
       .child('allAnswers')
       .on('value', snapshot => {
         if (snapshot.exists()) {
@@ -508,80 +508,81 @@ class App extends Component {
           })
 
           database.ref(this.state.roomCode)
-            .child('allAnswers')
-            .off()
+          .child('allAnswers')
+          .off()
         }
       })
-  }
+    }
 
-  calculateScores = (allVotes) => {
-    let are_scores_initialized = false
-    let scores = {}
+    calculateScores = (allVotes) => {
+      let are_scores_initialized = false
+      let scores = {}
 
-    for (var i = 0; i < allVotes.length; i++) {
-      var question = allVotes[i]
+        for (var i = 0; i < allVotes.length; i++) {
+          var question = allVotes[i]
 
-      const uids = Reflect.ownKeys(question) // [ uid_0, uid_1, ..]
+          const uids = Reflect.ownKeys(question) // [ uid_0, uid_1, ..]
 
-      if (!are_scores_initialized) {
-        for (var k = 0; k < uids.length; k++){
-          const uid = uids[k]
-          scores[uid] = 0
-        }
+          if (!are_scores_initialized) {
+            for (var k = 0; k < uids.length; k++){
+              const uid = uids[k]
+              scores[uid] = 0
+            }
 
-        are_scores_initialized = true
-      }
+            are_scores_initialized = true
+          }
 
-      for (var j = 0; j < uids.length; j++) {
-        const uid = uids[j]
-        const votes = question[uid]
+          for (var j = 0; j < uids.length; j++) {
+            const uid = uids[j]
+            const votes = question[uid]
 
-        var vote_count = 0
+            var vote_count = 0
 
-        for (var key in votes) {
-          const vote = votes[key]
+            for (var key in votes) {
+              const vote = votes[key]
 
-          if (vote === true) {
-            vote_count = vote_count + 1
-          } else if (vote === false) {
-            vote_count = vote_count - 1
-          } else {
-            console.warn('Unexpected vote value. Must be true or false.')
+              if (vote === true) {
+                vote_count = vote_count + 1
+              } else if (vote === false) {
+                vote_count = vote_count - 1
+              } else {
+                console.warn('Unexpected vote value. Must be true or false.')
+              }
+            }
+
+            // If there are more YES vote than NO vote, add 1 point
+            if (vote_count > 0) {
+              scores[uid] = scores[uid] + 1
+            }
           }
         }
 
-        // If there are more YES vote than NO vote, add 1 point
-        if (vote_count > 0) {
-          scores[uid] = scores[uid] + 1
-        }
-      }
+
+      return scores
     }
 
-    return scores
-  }
+    onSubmitVotes = () => {
+      this.setState({
+        isResultView: true,
+        isVotingView: false
+      })
+      this.setVotesDb().then(this.incrementNumPlayersVoted())
 
-  onSubmitVotes = () => {
-    this.setState({
-      isResultView: true,
-      isVotingView: false
-    })
-    this.setVotesDb().then(this.incrementNumPlayersVoted())
+      // The hosts calculates the scores and uploads them
+      if (this.state.isHost) {
+        var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
+        numPlayersVotedRef.on('value', (snapshot) => {
 
-    // The hosts calculates the scores and uploads them
-    if (this.state.isHost) {
-      var numPlayersVotedRef = database.ref(this.state.roomCode+"/numPlayersVoted");
-      numPlayersVotedRef.on('value', (snapshot) => {
+          if (snapshot.val() === this.state.numPlayers) {
 
-        if (snapshot.val() === this.state.numPlayers) {
+            console.log("All players have submitted their votes")
 
-          console.log("All players have submitted their votes")
+            this.getVotesFromAllPlayers().then(() => {
+              // FIXME allVotes is shaky for now, print it out!
+              console.log(this.state.allVotes)
+              const scores = this.calculateScores(this.state.allVotes)
 
-          this.getVotesFromAllPlayers().then(() => {
-            // FIXME allVotes is shaky for now, print it out!
-            console.log(this.state.allVotes)
-            const scores = this.calculateScores(this.state.allVotes)
-
-            database.ref(this.state.roomCode)
+              database.ref(this.state.roomCode)
               .child('players')
               .on('value', snapshot => {
                 if (snapshot.exists()) {
@@ -602,16 +603,16 @@ class App extends Component {
                 }
 
                 database.ref(this.state.roomCode)
-                  .child('scores')
-                  .set(newScores)
+                .child('scores')
+                .set(newScores)
               })
-         })
-        }
-      })
-    }
+            })
+          }
+        })
+      }
 
-    // Everyone listens for the scores from Firebase (incl. host)
-    database.ref(this.state.roomCode)
+      // Everyone listens for the scores from Firebase (incl. host)
+      database.ref(this.state.roomCode)
       .child('scores')
       .on('value', snapshot => {
         if(snapshot.exists()) {
@@ -623,39 +624,39 @@ class App extends Component {
           database.ref(this.state.roomCode).child('score').off()
         }
       })
-  }
-
-  getVoteResults = (allAnswers) => {
-    var voteResults = Array(allAnswers.length)
-    for (var k = 0; k < allAnswers.length; k++) {
-      voteResults[k] = {}
     }
 
-    // Use any item in allAnswers array to retrive
-    // all the user-ids. The index 0 here is arbitrary.
-    var uids = []
-    var item = allAnswers[0]
-    var uid = null
-    for (uid in item) {
-      uids.push(uid)
-    }
+    getVoteResults = (allAnswers) => {
+      var voteResults = Array(allAnswers.length)
+      for (var k = 0; k < allAnswers.length; k++) {
+        voteResults[k] = {}
+      }
 
-    for (var i = 0; i < voteResults.length; i++) {
-      for (var j = 0; j < uids.length; j++) {
-        uid = uids[j]
-        if (allAnswers[i][uid].valid) {
-          voteResults[i][uid] = true
-        } else {
-          voteResults[i][uid] = false
+      // Use any item in allAnswers array to retrive
+      // all the user-ids. The index 0 here is arbitrary.
+      var uids = []
+      var item = allAnswers[0]
+      var uid = null
+      for (uid in item) {
+        uids.push(uid)
+      }
+
+      for (var i = 0; i < voteResults.length; i++) {
+        for (var j = 0; j < uids.length; j++) {
+          uid = uids[j]
+          if (allAnswers[i][uid].valid) {
+            voteResults[i][uid] = true
+          } else {
+            voteResults[i][uid] = false
+          }
         }
       }
+
+      return voteResults
     }
 
-    return voteResults
-  }
-
-  getAnswersFromAllPlayers = () => {
-    database.ref(this.state.roomCode)
+    getAnswersFromAllPlayers = () => {
+      database.ref(this.state.roomCode)
       .child('players')
       .on('value', snapshot => {
         let allAnswers = Array(this.state.numCategories)
@@ -675,15 +676,15 @@ class App extends Component {
         }
 
         database.ref(this.state.roomCode)
-          .child('allAnswers')
-          .set(allAnswers)
+        .child('allAnswers')
+        .set(allAnswers)
       })
-  }
+    }
 
-  getVotesFromAllPlayers = async () => {
-    // This function should only be called _after_ we are certain
-    // all the votes have been submitted!
-    database.ref(this.state.roomCode)
+    getVotesFromAllPlayers = async () => {
+      // This function should only be called _after_ we are certain
+      // all the votes have been submitted!
+      database.ref(this.state.roomCode)
       .child('players')
       .once('value')
       .then(snapshot => {
@@ -727,44 +728,44 @@ class App extends Component {
 
         return true
       })
-  }
+    }
 
-  componentWillUnmount = () => {
-    // TODO: put leaving logic here
-    console.log("Component will unmount");
-    auth.signOut();
-    database.ref(this.state.roomCode+"/abandoned").set(true);
-  }
+    componentWillUnmount = () => {
+      // TODO: put leaving logic here
+      console.log("Component will unmount");
+      auth.signOut();
+      database.ref(this.state.roomCode+"/abandoned").set(true);
+    }
 
-  onClickAdminView = () => {
-    console.log("Obliterating database")
-    database.ref().set(null)
-  }
+    onClickAdminView = () => {
+      console.log("Obliterating database")
+      database.ref().set(null)
+    }
 
-  render() {
-    return (
-      <div className="App">
+    render() {
+      return (
+        <div className="App">
         {this.state.isStartView
           &&
           <StartView
-            onCreate={this.createGame}
-            onJoin={this.joinGame}
+          onCreate={this.createGame}
+          onJoin={this.joinGame}
           />
         }
         <div className="body">
         {this.state.isHostView
           &&
           <HostView code={this.state.roomCode}
-            onClick={this.startGame}
-            changeHandler={this.changeHandler}
-            submitHandler={this.submitHostFormHandler}
+          onClick={this.startGame}
+          changeHandler={this.changeHandler}
+          submitHandler={this.submitHostFormHandler}
           />
         }
         {this.state.isLobbyView
           &&
           <LobbyView
-            players={this.state.players}
-            roomCode={this.state.roomCode}
+          players={this.state.players}
+          roomCode={this.state.roomCode}
           />
         }
         </div>
@@ -772,18 +773,18 @@ class App extends Component {
         {this.state.timerShow
           &&
           <div className="Timer-container">
-            <Timer timeRemaining={this.state.timeRemaining}/>
+          <Timer timeRemaining={this.state.timeRemaining}/>
           </div>
         }
         {/* <AdminView onClick={this.onClickAdminView} /> */}
         {this.state.isGameView
           &&
           <GameView
-            categories={this.state.categoriesList}
-            categoryLetter={this.state.categoryLetter}
-            onChange={this.onChangeAnswer}
-            onSubmit={this.onSubmitAnswers}
-            className="Game-view"
+          categories={this.state.categoriesList}
+          categoryLetter={this.state.categoryLetter}
+          onChange={this.onChangeAnswer}
+          onSubmit={this.onSubmitAnswers}
+          className="Game-view"
           />
         }
         </div>
@@ -794,69 +795,465 @@ class App extends Component {
         {this.state.isVotingView
           &&
           <VotingView
-            categories={this.state.categoriesList}
-            categoryLetter={this.state.categoryLetter}
-            allAnswers={this.state.allAnswers}
-            onChange={this.onChangeVoteCheckbox}
-            voteResults={this.state.voteResults}
-            onSubmitVotes={this.onSubmitVotes}
-            numPlayers={this.state.numPlayers}
+          categories={this.state.categoriesList}
+          categoryLetter={this.state.categoryLetter}
+          allAnswers={this.state.allAnswers}
+          onChange={this.onChangeVoteCheckbox}
+          voteResults={this.state.voteResults}
+          onSubmitVotes={this.onSubmitVotes}
+          numPlayers={this.state.numPlayers}
           />
         }
         {this.state.isResultView
           &&
           <ResultView
-            scores={this.state.scores}
+          scores={this.state.scores}
           />
         }
         <CreateForm
-          show={this.state.modalShowCreateGame}
-          onHide={() => this.setState({modalShowCreateGame: false})}
-          onSubmit={this.submitCreateForm}
-          onChange={this.changeHandler}
+        show={this.state.modalShowCreateGame}
+        onHide={() => this.setState({modalShowCreateGame: false})}
+        onSubmit={this.submitCreateForm}
+        onChange={this.changeHandler}
         />
         <JoinForm
-          show={this.state.modalShowJoinGame}
-          onHide={() => this.setState({modalShowJoinGame: false})}
-          onSubmit={this.submitJoinForm}
-          onChange={this.changeHandler}
+        show={this.state.modalShowJoinGame}
+        onHide={() => this.setState({modalShowJoinGame: false})}
+        onSubmit={this.submitJoinForm}
+        onChange={this.changeHandler}
         />
-      </div>
-    );
-  }
-}
+        </div>
+        );
+      }
+    }
 
-function GenerateRandomCategories(size) {
-    // Choose {size} categories from the following premade list
-    const possible_categories = [
-      "A boy’s name",
-      "A river",
-      "An animal",
-      "Things that are cold",
-      "Insects",
-      "TV Shows",
-      "Things that grow",
-      "Fruits",
-      "Things that are black",
-      "School subjects",
-      "Movie titles",
-      "Musical Instruments",
-    ]
+    function GenerateRandomCategories(size) {
+      // Choose {size} categories from the following premade list
+      const possible_categories = [
+        "A BOY'S NAME",
+        "U.S. CITIES",
+        "THINGS THAT ARE COLD",
+        "SCHOOL SUPPLIES",
+        "PRO SPORTS TEAMS",
+        "INSECTS",
+        "BREAKFAST FOODS",
+        "FURNITURE",
+        "TV SHOWS",
+        "THINGS FOUND IN THE OCEAN",
+        "PRESIDENTS",
+        "PRODUCT NAMES",
+        "VEGETABLES",
+        "STATES",
+        "THINGS YOU THROW AWAY",
+        "OCCUPATIONS",
+        "APPLIANCES",
+        "CARTOON CHARACTERS",
+        "TYPES OF DRINK",
+        "MUSICAL GROUPS",
+        "STORE NAMES",
+        "THINGS AT A FOOTBALL GAME",
+        "TREES",
+        "PERSONALITY TRAITS",
+        "ARTICLES OF CLOTHING",
+        "DESSERTS",
+        "CAR PARTS",
+        "THINGS FOUND ON A MAP",
+        "ATHLETES",
+        "4-LETTER WORDS",
+        "ITEMS IN A REFRIGERATOR",
+        "FARM ANIMALS",
+        "STREET NAMES",
+        "THINGS AT THE BEACH",
+        "COLORS",
+        "TOOLS",
+        "SPORTS",
+        "SONG TITLES",
+        "PARTS OF THE BODY",
+        "ETHNIC FOODS",
+        "THINGS YOU SHOUT",
+        "BIRDS",
+        "A GIRL'S NAME",
+        "WAYS TO GET FROM HERE TO THERE",
+        "ITEMS IN A KITCHEN",
+        "VILLAINS / MONSTERS",
+        "FLOWERS",
+        "THINGS YOU REPLACE",
+        "SANDWICHES",
+        "ITEMS IN A CATALOG",
+        "WORLD LEADERS / POLITICIANS",
+        "SCHOOL SUBJECTS",
+        "EXCUSES FOR BEING LATE",
+        "ICE CREAM FLAVORS",
+        "THINGS THAT JUMP / BOUNCE",
+        "TELEVISION STARS",
+        "THINGS IN A PARK",
+        "FOREIGN CITIES",
+        "STONES / GEMS",
+        "MUSICAL INSTRUMENTS",
+        "THINGS THAT ARE STICKY",
+        "AWARDS / CEREMONIES",
+        "CARS",
+        "SPICES / HERBS",
+        "BAD HABITS",
+        "COSMETICS / TOILETRIES",
+        "CELEBRITIES",
+        "COOKING UTENSILS",
+        "REPTILES / AMPHIBIANS",
+        "PARKS",
+        "LEISURE ACTIVITIES",
+        "THINGS YOU'RE ALLERGIC TO",
+        "FICTIONAL CHARACTERS",
+        "MENU ITEMS",
+        "MAGAZINES",
+        "CAPITALS",
+        "KINDS OF CANDY",
+        "ITEMS YOU SAVE UP TO BUY",
+        "FOOTWEAR",
+        "SOMETHING YOU KEEP HIDDEN",
+        "ITEMS IN A SUITCASE",
+        "THINGS WITH TAILS",
+        "SPORTS EQUIPMENT",
+        "CRIMES",
+        "NICKNAMES",
+        "THINGS IN THE SKY",
+        "PIZZA TOPPINGS",
+        "COLLEGES / UNIVERSITIES",
+        "FISH",
+        "COUNTRIES",
+        "THINGS THAT HAVE SPOTS",
+        "HISTORICAL FIGURES",
+        "SOMETHING YOU'RE AFRAID OF",
+        "TERMS OF MEASUREMENT",
+        "ITEMS IN THIS ROOM",
+        "BOOK TITLES",
+        "RESTAURANTS",
+        "NOTORIOUS PEOPLE",
+        "FRUITS",
+        "THINGS IN A MEDICINE CABINET",
+        "TOYS",
+        "HOUSEHOLD CHORES",
+        "BODIES OF WATER",
+        "AUTHORS",
+        "HALLOWEEN COSTUMES",
+        "WEAPONS",
+        "THINGS THAT ARE ROUND",
+        "WORDS ASSOCIATED WITH EXERCISE",
+        "HEROES",
+        "GIFTS / PRESENTS",
+        "TERMS OF ENDEARMENT",
+        "KINDS OF DANCES",
+        "THINGS THAT ARE BLACK",
+        "VEHICLES",
+        "TROPICAL LOCATIONS",
+        "COLLEGE MAJORS",
+        "DAIRY PRODUCTS",
+        "THINGS IN A SOUVENIR SHOP",
+        "ITEMS IN YOUR PURSE / WALLET",
+        "WORLD RECORDS",
+        "BABY FOODS",
+        "FAMOUS DUOS AND TRIOS",
+        "THINGS FOUND IN A DESK",
+        "VACATION SPOTS",
+        "DISEASES",
+        "WORDS ASSOCIATED WITH MONEY",
+        "ITEMS IN A VENDING MACHINE",
+        "MOVIE TITLES",
+        "GAMES",
+        "THINGS THAT YOU WEAR",
+        "BEERS",
+        "THINGS AT A CIRCUS",
+        "FAMOUS FEMALES",
+        "MEDICINE / DRUGS",
+        "THINGS MADE OF METAL",
+        "HOBBIES",
+        "PEOPLE IN UNIFORM",
+        "THINGS YOU PLUG IN",
+        "ANIMALS",
+        "LANGUAGES",
+        "NAMES USED IN THE BIBLE",
+        "JUNK FOOD",
+        "THINGS THAT GROW",
+        "COMPANIES",
+        "FROM TV, MOVIES AND BOOKS",
+        "DANGEROUS ANIMALS",
+        "ANIMALS THAT SWIM",
+        "FOUR-LEGGED CREATURES",
+        "THINGS ANIMALS EAT",
+        "PETS",
+        "ANIMALS FOUND IN FOREIGN LANDS",
+        "ANIMAL NOISES",
+        "AT THE ZOO",
+        "MASCOTS",
+        "ANIMALS THAT ADVERTISE PRODUCTS",
+        "ANIMALS THAT FLY",
+        "MOVIE STARS (LIVING)",
+        "MOVIE STARS (DEAD)",
+        "POLITICAL FIGURES",
+        "SPORTS PERSONALITIES",
+        "SEX SYMBOLS",
+        "NEWSCASTERS / JOURNALISTS",
+        "SINGERS",
+        "ARTISTS",
+        "CELEBRITIES YOU'D LIKE TO MEET",
+        "CHILDREN",
+        "STARS WHO APPEAR IN BOTH TV AND MOVIES",
+        "MILITARY LEADERS",
+        "THINGS THAT SMELL BAD",
+        "THINGS YOU CAN'T SEE",
+        "THINGS YOU DON'T WANT TO HEAR",
+        "THINGS THAT FEEL SOFT",
+        "THINGS THAT TASTE SPICY",
+        "THINGS THAT SMELL GOOD",
+        "THINGS THAT ARE RED",
+        "THINGS YOU NEVER TASTED",
+        "THINGS THAT ARE LOUD",
+        "THINGS YOU SHOULDN'T TOUCH",
+        "THINGS YOU SEE IN A CITY",
+        "THINGS THAT FEEL HOT",
+        "PRODUCE",
+        "COCKTAILS",
+        "SEAFOOD",
+        "LOW CALORIE FOODS",
+        "FOOD FOUND IN A DELI",
+        "BREAKFAST CEREALS",
+        "ANY GREEN FOOD OR DRINK",
+        "SOFT DRINKS",
+        "DISGUSTING THINGS TO EAT OR DRINK",
+        "HORS D'OEUVRES",
+        "FRIED FOODS",
+        "ON A WINE LIST",
+        "ITALIAN FOOD",
+        "FAST FOOD",
+        "KINDS OF SOUP",
+        "SNACKS",
+        "FOOD YOU EAT RAW",
+        "FOOD FOUND IN A CASSEROLE",
+        "FOOD AT A CARNIVAL OR FAIR",
+        "HEALTH FOOD",
+        "CANNED FOOD",
+        "CHINESE FOOD",
+        "FOUND IN A SALAD BAR",
+        "MEXICAN FOOD",
+        "PEOPLE YOU ADMIRE",
+        "LAST NAMES",
+        "PEOPLE WHO DO DANGEROUS JOBS",
+        "COUPLES",
+        "PEOPLE WHO GO DOOR-TO-DOOR",
+        "NATIONALITIES",
+        "PEOPLE WHO WORK AT NIGHT",
+        "PEOPLE'S NAMES USED IN SONGS",
+        "PEOPLE YOU AVOID",
+        "SOMEONE FROM YOUR PAST",
+        "TITLES PEOPLE HAVE",
+        "PEOPLE WHO WORK ALONE",
+        "IN EUROPE",
+        "HONEYMOON SPOTS",
+        "COLD CLIMATES",
+        "PLACES YOU WOULDN'T WANT TO LIVE",
+        "ISLANDS",
+        "IN NORTH AMERICA",
+        "IN YOUR HOMETOWN",
+        "WITH A HIGH ALTITUDE",
+        "NOT ON THE PLANET EARTH",
+        "IN NATIONAL GEOGRAPHIC MAGAZINE",
+        "FICTITIOUS PLACES",
+        "WARM CLIMATES",
+        "THINGS FOUND IN THE WATER",
+        "GIFTS FOR THE BRIDE AND GROOM",
+        "TOURIST ATTRACTIONS",
+        "REASONS TO CALL EMERGENCY 911",
+        "THINGS YOU CARRY",
+        "THINGS FROM A STATIONERY STORE",
+        "REASONS TO QUIT YOUR JOB",
+        "THINGS WORN FROM THE WAIST UP",
+        "THINGS THAT ARE WHITE",
+        "THINGS FOUND IN A BASEMENT / CELLAR",
+        "THINGS WITH STRIPES",
+        "THINGS YOU NEED TICKETS TO SEE",
+        "MATH TERMS",
+        "THINGS YOU DO IN STUDY HALL",
+        "THINGS FOUND IN A LOCKER",
+        "THINGS YOU STUDY IN HISTORY",
+        "SCIENCE TERMS",
+        "AFTER SCHOOL ACTIVITIES",
+        "REASONS TO GO TO THE PRINCIPAL'S OFFICE",
+        "REASONS TO BE ABSENT",
+        "THINGS IN A CLASSROOM",
+        "THINGS YOU STUDY IN GEOGRAPHY",
+        "THINGS YOU DO IN GYM CLASS",
+        "FOUND IN THE CAFETERIA",
+        "TEAM NAMES",
+        "PLAYED INSIDE",
+        "PLAYED OUTSIDE",
+        "BOOKS, MOVIES, OR TV SHOWS ABOUT SPORTS",
+        "SPORTS TERMS",
+        "FEMALE ATHLETES",
+        "SPORTING EVENTS",
+        "A FOOTBALL PLAYER'S NAME",
+        "A BASEBALL PLAYER'S NAME",
+        "THINGS YOU SCREAM AT OFFICIALS",
+        "OLYMPIC EVENTS",
+        "ATHLETES WHO DO COMMERCIALS",
+        "CANCELLED TV SHOWS",
+        "MOVIES ON TV",
+        "CHILDREN'S TV SHOWS",
+        "COMEDY SHOWS",
+        "LONG-RUNNING TV SERIES",
+        "SHOWS YOU DON'T LIKE",
+        "THINGS SOLD IN COMMERCIALS",
+        "TV CHARACTER NAMES",
+        "FEMALE STARS",
+        "MALE STARS",
+        "THINGS YOU DO WHILE WATCHING TV",
+        "DAYTIME TV SHOWS",
+        "WORDS ENDING IN -LY",
+        "NOUNS",
+        "ACTION WORDS",
+        "ABBREVIATIONS",
+        "FOREIGN WORDS",
+        "5-LETTER WORDS",
+        "WORDS THAT END IN -ING",
+        "WORDS WITH A DOUBLE LETTER",
+        "WORDS SAID IN ANGER",
+        "ADJECTIVES",
+        "WORDS ENDING IN -ED",
+        "3-LETTER WORDS",
+        "THINGS AT A PICNIC",
+        "THINGS THAT ARE SOFT",
+        "THINGS IN A SCIENCE FICTION MOVIE",
+        "THINGS AT THE WHITE HOUSE",
+        "THINGS THAT KIDS PLAY WITH",
+        "THINGS AT A WEDDING",
+        "HOT PLACES",
+        "THINGS IN OUTER SPACE",
+        "FOUND IN A COLLEGE DORM",
+        "THINGS AT A DINER",
+        "FAMOUS SINGERS",
+        "THINGS AT AN AMUSEMENT PARK",
+        "WORN ABOVE THE WAIST",
+        "THINGS THAT ARE BRIGHT",
+        "THINGS THAT HAVE NUMBERS",
+        "FOUND IN A GYM / HEALTH CLUB",
+        "THINGS ON A SAFARI",
+        "WAYS TO SAY HI AND BYE",
+        "THINGS FROM THE SIXTIES",
+        "HOLIDAY THINGS",
+        "ITEMS IN AN OFFICE",
+        "THINGS IN PAIRS OR SETS",
+        "THINGS ON A HIGHWAY",
+        "THINGS IN LAS VEGAS",
+        "THINGS AT A ZOO",
+        "THINGS WITH MOTORS",
+        "THINGS THAT FLY",
+        "FOUND AT A SALAD BAR",
+        "WORDS ENDING IN -LY",
+        "THINGS ON A HIKING TRIP",
+        "THINGS IN A HOTEL",
+        "HEALTHY FOODS",
+        "FOUND IN A CLASSROOM",
+        "PARTY THINGS",
+        "REASONS TO SKIP SCHOOL / WORK",
+        "TITLES PEOPLE HAVE",
+        "THINGS IN A DESERT",
+        "THINGS IN A MYSTERY NOVEL",
+        "COMPUTER LINGO",
+        "LOUD THINGS",
+        "KINDS OF SOUPS / STEWS",
+        "MATH TERMS",
+        "UNDERGROUND THINGS",
+        "THINGS IN THE WILD WEST",
+        "THINGS IN AN AIRPORT",
+        "WORDS WITH DOUBLE LETTERS",
+        "FOUND IN NEW YORK CITY",
+        "THINGS IN FAIRY TALES",
+        "CHRISTMAS THINGS",
+        "SUMMER VACATION THINGS",
+        "WINTER VACATION THINGS",
+        "HALLOWEEN THINGS",
+        "HOLIDAY FOOD OR DRINK",
+        "VALENTINE'S DAY THINGS",
+        "THINGS IN A FOOD FIGHT",
+        "THINGS YOU EAT OR DRINK AT LUNCH",
+        "THINGS ON A HAMBURGER",
+        "YUCKY THINGS TO EAT OR DRINK",
+        "YUMMY THINGS MOM DOESN'T WANT YOU TO EAT",
+        "THINGS YOU EAT WITH YOUR FINGERS",
+        "WILD ANIMALS",
+        "THINGS YOU FEED YOUR PET",
+        "NAMES FOR A DOG OR CAT",
+        "ANIMALS THAT MAKE BAD PETS",
+        "ANIMALS THAT FLY OR SWIM",
+        "STUFFED ANIMALS",
+        "THINGS YOU DO AT RECESS",
+        "REASONS YOU DIDN'T DO YOUR HOMEWORK",
+        "A CLASSMATE'S NAME",
+        "EXCUSES TO LEAVE THE CLASSROOM",
+        "SOMETHING YOU STUDY",
+        "PLACES TO GO ON FIELD TRIPS",
+        "PICNIC THINGS",
+        "STUFF YOU WEAR ON THE WEEKEND",
+        "MOVIES",
+        "THINGS AT A BASEBALL GAME",
+        "THINGS AT AN AMUSEMENT PARK",
+        "THINGS AT THE MALL",
+        "STREET NAMES",
+        "THINGS IN A LIBRARY",
+        "THINGS IN A FIRE STATION",
+        "PEOPLE IN YOUR NEIGHBORHOOD",
+        "PLACES TO EAT",
+        "THINGS IN A POLICE STATION",
+        "OUTDOOR ACTIVITIES",
+        "AFTER SCHOOL SNACKS",
+        "TV SHOWS",
+        "TOYS OR GAMES",
+        "AFTER SCHOOL HANGOUTS",
+        "AFTER SCHOOL CHORES",
+        "THINGS YOU BRING",
+        "PLACES YOU'D LIKE TO GO",
+        "THINGS YOU TAKE PICTURES OF",
+        "SOMETHING AT THE BEACH",
+        "CAMP STUFF",
+        "SEEN FROM THE CAR WINDOW",
+        "SHORT WORDS",
+        "LONG WORDS",
+        "WORDS ABOUT MONEY",
+        "ACTION WORDS",
+        "WORDS ABOUT SPORTS",
+        "WORDS ABOUT MUSIC",
+        "A PERSON YOU LIKE",
+        "SOMETHING YOU HATE TO DO",
+        "SOMETHING YOU WISH FOR",
+        "SOMETHING YOU'RE GOOD AT",
+        "SOMETHING THAT'S GROSS",
+        "SOMETHING THAT MAKES YOU HAPPY",
+        "THINGS AT A PARADE",
+        "WAYS TO MAKE MONEY",
+        "SONGS OR SINGERS",
+        "WAYS TO BUG THE BABYSITTER",
+        "SOMETHING SCARY",
+        "SOMETHING IN YOUR BEDROOM",
+        "SOMEBODY COOL",
+        "THINGS AT A BIRTHDAY PARTY",
+        "THINGS THAT MAKE NOISE",
+        "FAST THINGS",
+        "THINGS AT A WEDDING",
+        "PLACES OR THINGS ON A MAP",
+      ]
 
-    let chosen_categories = []
-    for (var i = 0; i < size; i++) {
+      let chosen_categories = []
+      for (var i = 0; i < size; i++) {
         // Choose a random category
         var random_index = Math.floor(Math.random() * possible_categories.length)
         chosen_categories.push({
-            id: i,
-            name: possible_categories[random_index],
-            answer: ""
+          id: i,
+          name: possible_categories[random_index],
+          answer: ""
         })
         // Remove the chosen category from the list so we don't get duplicates
         possible_categories.splice(random_index, 1)
+      }
+
+      return chosen_categories;
     }
 
-    return chosen_categories;
-}
-
-export default App;
+    export default App;

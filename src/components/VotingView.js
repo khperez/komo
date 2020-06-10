@@ -63,9 +63,10 @@ export default function VotingView({
 
   return (
     <div>
-    <h1>Voting View (Letter: {categoryLetter})</h1>
-    {checkboxes}
-    <Button onClick={onSubmitVotes}>Submit Votes</Button>
+      <h1>Vote</h1>
+      {checkboxes}
+      <Button onClick={onSubmitVotes}>Submit Votes</Button>
+      <div className="letter">{categoryLetter}</div>
     </div>
     )
   }
