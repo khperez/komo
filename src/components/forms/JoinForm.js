@@ -37,7 +37,7 @@ export default function JoinForm(props) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={props.onSubmit}>Submit</Button>
+          <Button onClick={(e) => props.onSubmit(e)} type="submit">Submit</Button>
         </Modal.Footer>
       </Modal>
     </div>

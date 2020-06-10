@@ -167,7 +167,8 @@ class App extends Component {
     })
   }
 
-  submitCreateForm = () => {
+  submitCreateForm = (e) => {
+    e.preventDefault();
     this.generateRoomCode()
     .then(this.login()
     .then(this.createUser)
@@ -184,7 +185,8 @@ class App extends Component {
     })
   }
 
-  submitJoinForm = () => {
+  submitJoinForm = (e) => {
+    e.preventDefault();
     this.checkRoomCode()
     .then(this.login()
     .then(this.createUser))
@@ -469,7 +471,8 @@ class App extends Component {
       .then(() => {return true});
     }
 
-    onSubmitAnswers = () => {
+    onSubmitAnswers = (event) => {
+      event.preventDefault();
       console.log("onSubmitAnswers")
       this.setState({
         isAwaitResultsView: true,
@@ -819,7 +822,7 @@ class App extends Component {
         <JoinForm
         show={this.state.modalShowJoinGame}
         onHide={() => this.setState({modalShowJoinGame: false})}
-        onSubmit={this.submitJoinForm}
+        onSubmit={(e) => this.submitJoinForm(e)}
         onChange={this.changeHandler}
         />
         </div>
