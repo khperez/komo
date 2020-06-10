@@ -171,13 +171,20 @@ a.Github-link:visited {
   text-align: center;
 }
 
+.Results-container.container {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+}
+
 .Result-heading {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  font-size: 30px;
 }
 
-.Result-heading-score {
+.Result-heading-score.col {
   text-align: right;
 }
 
@@ -201,4 +208,15 @@ a.Github-link:visited {
 
 .Lobby-players-connected {
   text-align: center;
+}
+
+.Winner-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+img.yoshi {
+  width: 70vh;
 }

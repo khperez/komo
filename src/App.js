@@ -12,6 +12,7 @@ import AwaitResultsView from './components/AwaitResultsView';
 import VotingView from './components/VotingView';
 import AdminView from './components/AdminView';
 import Timer from './components/Timer';
+import WinnerPrize from './components/WinnerPrize';
 
 class App extends Component {
   constructor(props) {
@@ -45,6 +46,7 @@ class App extends Component {
       timerShow: false,
       isGameOver: false,
       scores: {},
+      showWinnerModal: false,
     };
   }
 
@@ -480,7 +482,9 @@ class App extends Component {
     }
 
     onSubmitAnswers = (event) => {
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+      }
       console.log("onSubmitAnswers")
       this.setState({
         isAwaitResultsView: true,
@@ -754,6 +758,12 @@ class App extends Component {
       database.ref().set(null)
     }
 
+    showWinnerPrize = () => {
+      this.setState({
+        showWinnerModal: true
+      })
+    }
+
     render() {
       return (
         <div className="App">
@@ -819,6 +829,8 @@ class App extends Component {
           &&
           <ResultView
           scores={this.state.scores}
+          handleClick={this.showWinnerPrize}
+          currentUser={this.state.username}
           />
         }
         <CreateForm
@@ -833,6 +845,9 @@ class App extends Component {
         onSubmit={(e) => this.submitJoinForm(e)}
         onChange={this.changeHandler}
         />
+        <WinnerPrize
+        show={this.state.showWinnerModal}
+        onHide={() => this.setState({showWinnerModal: false})}/>
         </div>
         );
       }
