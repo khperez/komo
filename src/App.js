@@ -800,13 +800,18 @@ class App extends Component {
         }
         {this.state.isGameView
           &&
-          <GameView
-          categories={this.state.categoriesList}
-          categoryLetter={this.state.categoryLetter}
-          onChange={this.onChangeAnswer}
-          onSubmit={this.onSubmitAnswers}
-          className="Game-view"
-          />
+          <>
+            <GameView
+            categories={this.state.categoriesList}
+            categoryLetter={this.state.categoryLetter}
+            onChange={this.onChangeAnswer}
+            onSubmit={this.onSubmitAnswers}
+            className="Game-view"
+            />
+            <div className="letter">
+              {this.state.categoryLetter}
+            </div>
+          </>
         }
         </div>
         {this.state.isAwaitResultsView

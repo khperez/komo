@@ -20,9 +20,6 @@ export default function GameView({categories, categoryLetter, onChange, onSubmit
         {categoryList}
         <Button onClick={onSubmit} type='submit'>Submit</Button>
       </div>
-      <div className="letter">
-        {categoryLetter}
-      </div>
     </div>
     )
   }

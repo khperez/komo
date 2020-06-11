@@ -220,3 +220,59 @@ a.Github-link:visited {
 img.yoshi {
   width: 70vh;
 }
+
+@media only screen and (max-width: 795px) {
+  body {
+    background-color: lightblue;
+  }
+  .App-title {
+    font-size: 10vh;
+  }
+  .Host-lobby-view {
+    width: 90vw;
+  }
+  .Host-view-settings {
+    font-size: 3vh;
+    text-align: center;
+  }
+  .Room-code-main {
+    font-size: 3vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+  .Room-code-title {
+    text-align: center;
+  }
+  .Room-code-id {
+    font-size: 3vh;
+  }
+  .Lobby-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .Game-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .Timer-container {
+    height: 10vh;
+    width: 100vw;
+  }
+  .timer {
+    font-size: 5.5vh;
+    position: absolute;
+    width: 100vw;
+    height: 10vh;
+    margin: auto;
+    padding: 10px 0px;
+  }
+  .letter {
+    font-size: 5.5vh;
+    padding: 10px;
+    height: 10vh;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
+}

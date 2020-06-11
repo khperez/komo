@@ -5,15 +5,17 @@ export default function LobbyView({players, roomCode}) {
     <li key={i} className="player">{player}</li>
   );
   return (
-    <div>
+    <div className="Lobby-container">
       <div className="Room-code-main">
-        Room Code:
-        <span className="Room-code-id">
+        <div className="Room-code-title">
+          Room Code
+        </div>
+        <div className="Room-code-id">
           {roomCode}
-        </span>
+        </div>
       </div>
       <div className="Lobby-players-connected">
-        Players connected: {players.length} 
+        Players: {players.length} 
       </div>
       <ul className="playerList">
         {playerList}
