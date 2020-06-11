@@ -51,7 +51,7 @@
 }
 
 .Host-view-settings {
-  font-size: 30px;
+  font-size: 3vw;
 }
 
 .Join-view {
@@ -118,6 +118,7 @@
 }
 
 .timer {
+  max-width: 10vw;
   color: var(--main-fg-color);
   text-align: center;
 }
@@ -147,15 +148,6 @@
   height: 6vh;
   padding: 1vh;
 }
-
-/* .Game-form {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  overflow: auto;
-  max-height: 80vh;
-  min-width: 100vw;
-} */
 
 a.Github-link:link {
   color: var(--secondary-fg-light-color);
@@ -300,7 +292,9 @@ button.btn.btn-primary {
   }
 
   .Game-form {
+    overflow-y: scroll;
     padding: 5vh 20vh;
+    margin-bottom: 2rem;
   }
 
 @media only screen and (max-width: 823px) {
@@ -339,11 +333,11 @@ button.btn.btn-primary {
     margin: 0px;
   }
   .Host-view-settings {
-    font-size: 3vh;
+    font-size: 10vw;
     text-align: center;
   }
   .Room-code-main {
-    font-size: 3vh;
+    font-size: 10vw;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -352,7 +346,7 @@ button.btn.btn-primary {
     text-align: center;
   }
   .Room-code-id {
-    font-size: 3vh;
+    font-size: 10vw;
   }
   .Lobby-container {
     display: flex;
@@ -373,12 +367,8 @@ button.btn.btn-primary {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    height: 6vh;
+    min-height: 7vh;
     padding: 1vh;
-  }
-  .Timer-container {
-    height: 10vh;
-    width: 100vw;
   }
   .Results-container.container {
     min-height: 100vh;
