@@ -292,7 +292,7 @@ button.btn.btn-primary {
     left: 0px;
   }
   .Voting-submit {
-    position: absolute;
+    position: fixed;
     bottom: 0px;
     width: 100vw;
     background-color: var(--main-bg-color);
@@ -365,7 +365,7 @@ button.btn.btn-primary {
     padding: 5vh;
   }
   .Game-form-submit {
-    position: absolute;
+    position: fixed;
     bottom: 0px;
     left: 0px;
     background-color: var(--secondary-fg-color);
