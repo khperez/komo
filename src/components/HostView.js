@@ -17,11 +17,11 @@ function NumCategoriesForm({changeHandler, submitHandler}) {
             placeholder="timer in seconds"
             name="timeRemaining" />
           </Form.Group>
-          <p>
-          <Button type="submit" label="login" variant="contained">
-            Start Game
-          </Button>
-          </p>
+          <div className="Host-settings-submit">
+            <Button type="submit" label="login" variant="contained">
+              Start Game
+            </Button>
+          </div>
         </form>
       </div>
   );

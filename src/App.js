@@ -13,6 +13,7 @@ import VotingView from './components/VotingView';
 import AdminView from './components/AdminView';
 import Timer from './components/Timer';
 import WinnerPrize from './components/WinnerPrize';
+import Button from 'react-bootstrap/Button';
 
 class App extends Component {
   constructor(props) {
@@ -767,6 +768,7 @@ class App extends Component {
     render() {
       return (
         <div className="App">
+          <div className="Game-view">
         {this.state.isStartView
           &&
           <StartView
@@ -774,61 +776,88 @@ class App extends Component {
           onJoin={this.joinGame}
           />
         }
-        <div className="Host-lobby-view">
         {this.state.isHostView
           &&
+        <div className="Host-lobby-view">
           <HostView code={this.state.roomCode}
           onClick={this.startGame}
           changeHandler={this.changeHandler}
           submitHandler={this.submitHostFormHandler}
           />
+        </div>
         }
         {this.state.isLobbyView
           &&
+        <div className="Host-lobby-view">
           <LobbyView
           players={this.state.players}
           roomCode={this.state.roomCode}
           />
-        }
         </div>
-        <div className="Game-container">
-        {this.state.timerShow
-          &&
-          <div className="Timer-container">
-          <Timer timeRemaining={this.state.timeRemaining}/>
-          </div>
         }
         {this.state.isGameView
           &&
-          <>
-            <GameView
-            categories={this.state.categoriesList}
-            categoryLetter={this.state.categoryLetter}
-            onChange={this.onChangeAnswer}
-            onSubmit={this.onSubmitAnswers}
-            className="Game-view"
-            />
-            <div className="letter">
-              {this.state.categoryLetter}
-            </div>
-          </>
+          <div>
+              <div className="Voting-container">
+                <div className="Voting-header">
+                  <Timer>{this.state.timeRemaining}</Timer>
+                  <div className="letter">
+                  {this.state.categoryLetter}
+                  </div>
+                </div>
+                <div className="Voting-form">
+                  <div className="Voting-form-header"/>
+                    <GameView
+                    categories={this.state.categoriesList}
+                    categoryLetter={this.state.categoryLetter}
+                    onChange={this.onChangeAnswer}
+                    onSubmit={this.onSubmitAnswers}
+                    className="Game-view"
+                    />
+                  <div className="Voting-form-footer"/>
+                </div>
+                <div className="Voting-submit">
+                  <div className="Game-form-submit">
+                    <Button onClick={this.onSubmitAnswers} type='submit'>Submit</Button>
+                  </div>
+                </div>
+              </div>
+          </div>
         }
-        </div>
         {this.state.isAwaitResultsView
           &&
           <AwaitResultsView players={this.state.submittedPlayers}/>
         }
         {this.state.isVotingView
           &&
-          <VotingView
-          categories={this.state.categoriesList}
-          categoryLetter={this.state.categoryLetter}
-          allAnswers={this.state.allAnswers}
-          onChange={this.onChangeVoteCheckbox}
-          voteResults={this.state.voteResults}
-          onSubmitVotes={this.onSubmitVotes}
-          numPlayers={this.state.numPlayers}
-          />
+          <div>
+              <div className="Voting-container">
+                <div className="Voting-header">
+                  <div className="Voting-header-title">Vote</div>
+                  <div className="letter">
+                  {this.state.categoryLetter}
+                  </div>
+                </div>
+                <div className="Voting-form">
+                  <div className="Voting-form-header"/>
+                  <VotingView
+                  categories={this.state.categoriesList}
+                  categoryLetter={this.state.categoryLetter}
+                  allAnswers={this.state.allAnswers}
+                  onChange={this.onChangeVoteCheckbox}
+                  voteResults={this.state.voteResults}
+                  onSubmitVotes={this.onSubmitVotes}
+                  numPlayers={this.state.numPlayers}
+                  />
+                  <div className="Voting-form-footer"/>
+                </div>
+                <div className="Voting-submit">
+                  <div className="Game-form-submit">
+                    <Button onClick={this.onSubmitVotes} type='submit'>Submit</Button>
+                  </div>
+                </div>
+              </div>
+          </div>
         }
         {this.state.isResultView
           &&
@@ -853,6 +882,7 @@ class App extends Component {
         <WinnerPrize
         show={this.state.showWinnerModal}
         onHide={() => this.setState({showWinnerModal: false})}/>
+          </div>
         </div>
         );
       }

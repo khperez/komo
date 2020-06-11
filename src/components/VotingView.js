@@ -25,12 +25,12 @@ export default function VotingView({
   })
 
   var checkboxes =
-  <div>
+  <div className="Voting-categories-checkboxes">
   {categories.map(category => {
     var allAnswersForOneCategory = allAnswers[category.id]
 
     return  <div key={category.id}>
-    <h2 >{category.name}</h2>
+    <div className="Vote-category">{category.name}</div>
     {Object.keys(allAnswersForOneCategory).map(uid=> {
       const answer = allAnswersForOneCategory[uid]
 
@@ -61,11 +61,8 @@ export default function VotingView({
   </div>
 
   return (
-    <div>
-      <h1>Vote</h1>
+    <div className="Vote-view">
       {checkboxes}
-      <Button onClick={onSubmitVotes}>Submit Votes</Button>
-      <div className="letter">{categoryLetter}</div>
     </div>
     )
   }

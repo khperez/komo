@@ -1,3 +1,10 @@
+:root {
+  --main-bg-color: #264653;
+  --main-fg-color: #e76f51;
+  --main-fg-light-color: #F4D35E;
+  --secondary-fg-color: #F4A261;
+  --secondary-fg-light-color: #2A9D8F;
+}
 .App {
   min-height: 100vh;
   display: flex;
@@ -12,7 +19,7 @@
 .App-title {
   display: flex;
   font-family: 'Catamaran', sans-serif;
-  color: #36BFAA;
+  color: var(--main-fg-color);
   margin: 0px 5px;
   font-size: 20vh;
   text-align: center;
@@ -67,7 +74,7 @@
 }
 
 .Room-code-id {
-  color: #36BFAA;
+  color: var(--secondary-fg-light-color);
   margin: 0px 5px;
   font-size: 30px;
   border-style: dashed;
@@ -80,8 +87,14 @@
 .Host-lobby-view {
   display: flex;
   flex-direction: row;
-  width: 50vw;
+  min-width: 30vw;
   justify-content: space-around;
+}
+
+.Host-settings-submit {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .playerList {
@@ -90,9 +103,9 @@
 }
 
 .player {
-  background: #343C5B;
+  background: var(--main-fg-light-color);
   border-radius: 10px;
-  color: white;
+  color: var(--main-fg-color);
   padding: 10px 10px 10px 20px;
   margin: 10px;
 }
@@ -104,19 +117,8 @@
   height: 25vh;
 }
 
-.Timer-container {
-  height: 100vh;
-  background: #262730;
-  position: fixed;
-  left: 0;
-  top: 0;
-}
-
 .timer {
-  font-size: 100px;
-  padding: 20px;
-  color: #776885;
-  width: 205px;
+  color: var(--main-fg-color);
   text-align: center;
 }
 
@@ -127,29 +129,36 @@
 
 .Game-view {
   display: flex;
-  height: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-width: 100vw;
+  min-height: 100vh;
 }
 
-.letter {
-  color: #73C2BE;
-  background:  #32716E;
-  font-size: 10vw;
-  text-align: center;
+.Game-form-submit {
   position: fixed;
-  right: 0px;
-  top: 0px;
-  height: 100vh;
-  padding: 20px;
-}
-
-.Game-form {
+  bottom: 0px;
+  background-color: var(--secondary-fg-color);
+  width: 100vw;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: center;
+  height: 6vh;
+  padding: 1vh;
 }
 
+/* .Game-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  overflow: auto;
+  max-height: 80vh;
+  min-width: 100vw;
+} */
+
 a.Github-link:link {
-  color: rgb(193, 193, 193);
+  color: var(--secondary-fg-light-color);
 }
 
 a.Github-link:hover {
@@ -157,7 +166,7 @@ a.Github-link:hover {
 }
 
 a.Github-link:visited {
-  color: rgb(193, 193, 193);
+  color: var(--secondary-fg-light-color);
 }
 
 .Start-view {
@@ -189,21 +198,22 @@ a.Github-link:visited {
 }
 
 .Result-player-name {
-  background: #343C5B;
+  background: var(--main-fg-color);
   border-radius: 10px;
-  color: white;
+  color: var(--main-fg-light-color);
   margin: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  font-size: 3vh;
 }
 
 .Result-player-score {
-  background: rgb(123, 142, 216);
   border-radius: 10px;
-  color: white;
-  padding: 5px 10px;
+  color: var(--main-fg-light-color);
+  padding: 1px 10px;
+  font-size: 3vh;
 }
 
 .Lobby-players-connected {
@@ -218,18 +228,115 @@ a.Github-link:visited {
 }
 
 img.yoshi {
-  width: 70vh;
+  height: 50vh;
 }
 
-@media only screen and (max-width: 795px) {
-  body {
-    background-color: lightblue;
+button.btn.btn-primary {
+  background-color: var(--main-bg-color);
+  border: none;
+}
+  .Voting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+  }
+  .Voting-header {
+    position: absolute;
+    top: 0px;
+    width: 100vw;
+    background: var(--main-bg-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 30px;
+    font-size: 5vh;
+    min-height: 10vh;
+  }
+  .Voting-header-title {
+    color: var(--main-fg-color);
+  }
+  .letter {
+    color: var(--main-fg-light-color);
+  }
+  .Vote-view {
+    overflow: auto;
+    flex-grow: 2;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 84vh;
+  }
+  .Voting-form {
+    overflow-y: scroll;
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+  }
+  .Voting-categories-checkboxes {
+    max-height: 84vh;
+    margin-top: 5vh;
+  }
+  .Voting-form-header {
+    width: 100vw;
+    min-height: 10vh;
+  }
+  .Voting-form-footer {
+    min-height: 6vh;
+    width: 100vw;
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+  }
+  .Voting-submit {
+    position: absolute;
+    bottom: 0px;
+    width: 100vw;
+    background-color: var(--main-bg-color);
+    color: var(--main-fg-color);
+  }
+
+  .Game-form {
+    padding: 5vh 20vh;
+  }
+
+@media only screen and (max-width: 823px) {
+  .App {
+    max-height: 100vh;
+    max-width: 100vw;
+    justify-content: space-around;
+  }
+  .Game-view {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+  .Start-view {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .hostView {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .App-title {
     font-size: 10vh;
   }
   .Host-lobby-view {
-    width: 90vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 100vw;
+  }
+  .Host-form.form-group {
+    height: 20vh;
+    margin: 0px;
   }
   .Host-view-settings {
     font-size: 3vh;
@@ -238,8 +345,8 @@ img.yoshi {
   .Room-code-main {
     font-size: 3vh;
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    flex-direction: row;
+    justify-content: center;
   }
   .Room-code-title {
     text-align: center;
@@ -252,27 +359,44 @@ img.yoshi {
     flex-direction: column;
   }
   .Game-container {
+    height: 20vh;
+  }
+  .Game-form {
+    padding: 5vh;
+  }
+  .Game-form-submit {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    background-color: var(--secondary-fg-color);
+    min-width: 100vw;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
+    height: 6vh;
+    padding: 1vh;
   }
   .Timer-container {
     height: 10vh;
     width: 100vw;
   }
-  .timer {
-    font-size: 5.5vh;
-    position: absolute;
-    width: 100vw;
-    height: 10vh;
-    margin: auto;
-    padding: 10px 0px;
+  .Results-container.container {
+    min-height: 100vh;
+    min-width: 60vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
-  .letter {
-    font-size: 5.5vh;
-    padding: 10px;
-    height: 10vh;
-    position: absolute;
-    right: 0px;
-    top: 0px;
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
   }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+
 }

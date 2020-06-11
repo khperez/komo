@@ -2,7 +2,7 @@ import React from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-export default function GameView({categories, categoryLetter, onChange, onSubmit}) {
+export default function GameView({categories, onChange, onSubmit}) {
   const categoryList = categories.map((category) =>
     <Form
       onChange={onChange.bind(this, category.id)}
@@ -18,7 +18,6 @@ export default function GameView({categories, categoryLetter, onChange, onSubmit
     <div className="Game-form">
       <div>
         {categoryList}
-        <Button onClick={onSubmit} type='submit'>Submit</Button>
       </div>
     </div>
     )
