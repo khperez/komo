@@ -184,9 +184,9 @@ class App extends Component {
     .then(this.login()
     .then(this.createUser)
     .then(this.updateNumPlayersDbAndLocal)
-    .then(this.listenNumPlayersDb))
+    .then(this.listenNumPlayersDb)
     .then(this.setHostDb)
-    .then(this.setHostLocal)
+    .then(this.setHostLocal))
     this.setState({
       isStartView: false,
       modalShowCreateGame: false,
