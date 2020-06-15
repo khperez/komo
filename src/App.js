@@ -870,7 +870,7 @@ class App extends Component {
         <CreateForm
         show={this.state.modalShowCreateGame}
         onHide={() => this.setState({modalShowCreateGame: false})}
-        onSubmit={this.submitCreateForm}
+        onSubmit={(e) => this.submitCreateForm(e)}
         onChange={this.changeHandler}
         />
         <JoinForm

@@ -3,8 +3,21 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormGroup from 'react-bootstrap/FormGroup';
+import { useState }  from 'react';
 
 export default function CreateForm(props) {
+
+  const [validated, setValidated] = useState(false);
+
+  const handleSubmit = (event) => {
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    setValidated(true);
+  };
+
   return (
     <div>
       <Modal
@@ -19,19 +32,22 @@ export default function CreateForm(props) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onChange={props.onChange}>
+          <Form noValidate validated={validated} onSubmit={handleSubmit}>
               <FormGroup>
                 <Form.Label>Username</Form.Label>
                 <Form.Control
+                  required
+                  type="text"
+                  minLength="1"
+                  maxLength="10"
                   placeholder="Enter username"
                   name="username"
+                  onChange={props.onChange}
                 />
               </FormGroup>
+              <Button type="submit">Submit</Button>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={props.onSubmit}>Submit</Button>
-        </Modal.Footer>
       </Modal>
     </div>
   );
