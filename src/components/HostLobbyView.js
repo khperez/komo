@@ -27,7 +27,7 @@ function NumCategoriesForm({changeHandler, submitHandler}) {
   );
 }
 
-export default function HostView (
+export default function HostLobbyView (
   {
     changeHandler,
     submitHandler 

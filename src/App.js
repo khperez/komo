@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { database, auth } from './firebase';
-import HostView from './components/HostView';
+import HostLobbyView from './components/HostLobbyView';
 import StartView from './components/StartView';
-import LobbyView from './components/LobbyView';
+import NonHostLobbyView from './components/NonHostLobbyView';
 import GameView from './components/GameView';
 import JoinForm from './components/forms/JoinForm';
 import CreateForm from './components/forms/CreateForm';
@@ -24,9 +24,9 @@ class App extends Component {
       roomCode: null,
       numPlayers: 0,
       isHost: false,
-      isHostView: false,
+      isHostLobbyView: false,
       isStartView: true,
-      isLobbyView: false,
+      isNonHostLobbyView: false,
       isJoinView: false,
       isGameView: false,
       isResultView: false,
@@ -190,8 +190,8 @@ class App extends Component {
     this.setState({
       isStartView: false,
       modalShowCreateGame: false,
-      isLobbyView: true,
-      isHostView: true,
+      isNonHostLobbyView: true,
+      isHostLobbyView: true,
       isHost: true,
     })
   }
@@ -204,14 +204,14 @@ class App extends Component {
     this.setState({
       isStartView: false,
       modalShowJoinGame: false,
-      isLobbyView: true,
+      isNonHostLobbyView: true,
     })
   }
 
-  setLobbyView = () => {
+  setNonHostLobbyView = () => {
     console.log('[local] List of players: ' + this.state.players);
     this.setState({
-      isLobbyView: true,
+      isNonHostLobbyView: true,
     });
   }
 
@@ -226,7 +226,7 @@ class App extends Component {
         });
         this.setState({
           players: playerList
-        }, this.setLobbyView);
+        }, this.setNonHostLobbyView);
       }
     }, function(err) {
       alert(`players read failed: ${err.code}`)
@@ -297,9 +297,9 @@ class App extends Component {
       var countdownHandler = setInterval(this.tick, 1000)
       this.setState({
         isGameView: true,
-        isHostView: false,
+        isHostLobbyView: false,
         isJoinView: false,
-        isLobbyView: false,
+        isNonHostLobbyView: false,
         timerShow: true,
         countdownHandler: countdownHandler,
       })
@@ -330,14 +330,14 @@ class App extends Component {
         if (this.state.isHost) {
           this.setState({
             isStartView: false,
-            isLobbyView: true,
-            isHostView: true,
+            isNonHostLobbyView: true,
+            isHostLobbyView: true,
           });
         } else {
           this.setState({
             isStartView: false,
-            isLobbyView: true,
-            isHostView: false,
+            isNonHostLobbyView: true,
+            isHostLobbyView: false,
           }, this.waitForGameStart);
         }
         this.updateLobbyPlayers();
@@ -391,7 +391,7 @@ class App extends Component {
       });
       this.setState({
         isGameView: true,
-        isLobbyView: false,
+        isNonHostLobbyView: false,
       });
     }
 
@@ -490,7 +490,7 @@ class App extends Component {
       this.setState({
         isAwaitResultsView: true,
         isGameView: false,
-        isLobbyView: false,
+        isNonHostLobbyView: false,
         isAnswerSubmitted: true,
       });
       this.setAnswersDb().then(this.incrementSubmittedCounter())
@@ -776,20 +776,20 @@ class App extends Component {
           onJoin={this.joinGame}
           />
         }
-        {this.state.isHostView
+        {this.state.isHostLobbyView
           &&
-        <div className="Host-lobby-view">
-          <HostView code={this.state.roomCode}
+        <div className="Lobby-view">
+          <HostLobbyView code={this.state.roomCode}
           onClick={this.startGame}
           changeHandler={this.changeHandler}
           submitHandler={this.submitHostFormHandler}
           />
         </div>
         }
-        {this.state.isLobbyView
+        {this.state.isNonHostLobbyView
           &&
-        <div className="Host-lobby-view">
-          <LobbyView
+        <div className="Lobby-view">
+          <NonHostLobbyView
           players={this.state.players}
           roomCode={this.state.roomCode}
           />

@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function LobbyView({players, roomCode}) {
+export default function NonHostLobbyView({players, roomCode}) {
   const playerList = players.map((player, i) =>
     <li key={i} className="player">{player}</li>
   );
