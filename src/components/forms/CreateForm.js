@@ -3,6 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormGroup from 'react-bootstrap/FormGroup';
+import { Link } from 'react-router-dom';
 
 export default function CreateForm(props) {
   return (
@@ -30,7 +31,11 @@ export default function CreateForm(props) {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button onClick={props.onSubmit}>Submit</Button>
+          <Button onClick={props.onSubmit}>
+            <Link to="/lobby">
+              Submit
+            </Link>
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

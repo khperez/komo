@@ -16,7 +16,21 @@ class MadeBy extends Component {
     }
   }
 
-export default function StartView({ onCreate, onJoin }) {
+export default class StartView extends Component {
+  componentDidMount() {
+    const {
+      currentUser,
+      login
+    } = this.props;
+    if (currentUser === null) {
+      login()
+    }
+  }
+  render() {
+    const {
+      onCreate,
+      onJoin,
+    } = this.props;
     return (
         <div className="Start-view">
             <Title />
@@ -24,4 +38,5 @@ export default function StartView({ onCreate, onJoin }) {
             <MadeBy />
         </div>
     );
+  }
 }

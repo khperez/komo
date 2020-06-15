@@ -14,6 +14,12 @@ import AdminView from './components/AdminView';
 import Timer from './components/Timer';
 import WinnerPrize from './components/WinnerPrize';
 import Button from 'react-bootstrap/Button';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
 
 class App extends Component {
   constructor(props) {
@@ -60,7 +66,7 @@ class App extends Component {
   componentDidMount() {
     // Sign out by default for now so we can test the 'Anonymous Login' button.
     // TODO: Probably should remove this in production TM.
-    auth.signOut();
+    // auth.signOut();
 
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -765,125 +771,163 @@ class App extends Component {
       })
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+      // if (this.props.currentUser === nextProps.currentUser) {
+      //   return false;
+      // } else {
+      //   return true;
+      // }
+      if (this.props.roomCode === nextProps.roomCode) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
     render() {
       return (
         <div className="App">
-          <div className="Game-view">
-        {this.state.isStartView
-          &&
-          <StartView
-          onCreate={this.createGame}
-          onJoin={this.joinGame}
-          />
-        }
-        {this.state.isHostView
-          &&
-        <div className="Host-lobby-view">
-          <HostView code={this.state.roomCode}
-          onClick={this.startGame}
-          changeHandler={this.changeHandler}
-          submitHandler={this.submitHostFormHandler}
-          />
-        </div>
-        }
-        {this.state.isLobbyView
-          &&
-        <div className="Host-lobby-view">
-          <LobbyView
-          players={this.state.players}
-          roomCode={this.state.roomCode}
-          />
-        </div>
-        }
-        {this.state.isGameView
-          &&
-          <div>
-              <div className="Voting-container">
-                <div className="Voting-header">
-                  <Timer>{this.state.timeRemaining}</Timer>
-                  <div className="letter">
-                  {this.state.categoryLetter}
-                  </div>
-                </div>
-                <div className="Voting-form">
-                  <div className="Voting-form-header"/>
-                    <GameView
-                    categories={this.state.categoriesList}
-                    categoryLetter={this.state.categoryLetter}
-                    onChange={this.onChangeAnswer}
-                    onSubmit={this.onSubmitAnswers}
-                    className="Game-view"
+          <Switch>
+            <Route path="/lobby">
+                {this.state.isHostView
+                  &&
+                  <div className="Host-lobby-view">
+                    <HostView code={this.state.roomCode}
+                    onClick={this.startGame}
+                    changeHandler={this.changeHandler}
+                    submitHandler={this.submitHostFormHandler}
                     />
-                  <div className="Voting-form-footer"/>
                 </div>
-                <div className="Voting-submit">
-                  <div className="Game-form-submit">
-                    <Button onClick={this.onSubmitAnswers} type='submit'>Submit</Button>
-                  </div>
-                </div>
-              </div>
-          </div>
-        }
-        {this.state.isAwaitResultsView
-          &&
-          <AwaitResultsView players={this.state.submittedPlayers}/>
-        }
-        {this.state.isVotingView
-          &&
-          <div>
-              <div className="Voting-container">
-                <div className="Voting-header">
-                  <div className="Voting-header-title">Vote</div>
-                  <div className="letter">
-                  {this.state.categoryLetter}
-                  </div>
-                </div>
-                <div className="Voting-form">
-                  <div className="Voting-form-header"/>
-                  <VotingView
-                  categories={this.state.categoriesList}
-                  categoryLetter={this.state.categoryLetter}
-                  allAnswers={this.state.allAnswers}
-                  onChange={this.onChangeVoteCheckbox}
-                  voteResults={this.state.voteResults}
-                  onSubmitVotes={this.onSubmitVotes}
-                  numPlayers={this.state.numPlayers}
-                  />
-                  <div className="Voting-form-footer"/>
-                </div>
-                <div className="Voting-submit">
-                  <div className="Game-form-submit">
-                    <Button onClick={this.onSubmitVotes} type='submit'>Submit</Button>
-                  </div>
-                </div>
-              </div>
-          </div>
-        }
-        {this.state.isResultView
-          &&
-          <ResultView
-          scores={this.state.scores}
-          handleClick={this.showWinnerPrize}
-          currentUser={this.state.username}
-          />
-        }
-        <CreateForm
-        show={this.state.modalShowCreateGame}
-        onHide={() => this.setState({modalShowCreateGame: false})}
-        onSubmit={this.submitCreateForm}
-        onChange={this.changeHandler}
-        />
-        <JoinForm
-        show={this.state.modalShowJoinGame}
-        onHide={() => this.setState({modalShowJoinGame: false})}
-        onSubmit={(e) => this.submitJoinForm(e)}
-        onChange={this.changeHandler}
-        />
-        <WinnerPrize
-        show={this.state.showWinnerModal}
-        onHide={() => this.setState({showWinnerModal: false})}/>
-          </div>
+                }
+                <LobbyView
+                  players={this.state.players}
+                  roomCode={this.state.roomCode}
+                />
+            </Route>
+            <Route path="/" exact>
+              <StartView
+                onCreate={this.createGame}
+                onJoin={this.joinGame}
+                currentUser={this.currentUser}
+                login={this.login}
+              />
+              <CreateForm
+                show={this.state.modalShowCreateGame}
+                onHide={() => this.setState({modalShowCreateGame: false})}
+                onSubmit={this.submitCreateForm}
+                onChange={this.changeHandler}
+              />
+              <JoinForm
+                show={this.state.modalShowJoinGame}
+                onHide={() => this.setState({modalShowJoinGame: false})}
+                onSubmit={(e) => this.submitJoinForm(e)}
+                onChange={this.changeHandler}
+              />
+            </Route>
+          </Switch>
         </div>
+        // <div className="App">
+        //   <div className="Game-view">
+        // {this.state.isStartView
+        //   &&
+        //   <StartView
+        //   onCreate={this.createGame}
+        //   onJoin={this.joinGame}
+        //   />
+        // }
+        // }
+        // {this.state.isLobbyView
+        //   &&
+        // }
+        // {this.state.isGameView
+        //   &&
+        //   <div>
+        //       <div className="Voting-container">
+        //         <div className="Voting-header">
+        //           <Timer>{this.state.timeRemaining}</Timer>
+        //           <div className="letter">
+        //           {this.state.categoryLetter}
+        //           </div>
+        //         </div>
+        //         <div className="Voting-form">
+        //           <div className="Voting-form-header"/>
+        //             <GameView
+        //             categories={this.state.categoriesList}
+        //             categoryLetter={this.state.categoryLetter}
+        //             onChange={this.onChangeAnswer}
+        //             onSubmit={this.onSubmitAnswers}
+        //             className="Game-view"
+        //             />
+        //           <div className="Voting-form-footer"/>
+        //         </div>
+        //         <div className="Voting-submit">
+        //           <div className="Game-form-submit">
+        //             <Button onClick={this.onSubmitAnswers} type='submit'>Submit</Button>
+        //           </div>
+        //         </div>
+        //       </div>
+        //   </div>
+        // }
+        // {this.state.isAwaitResultsView
+        //   &&
+        //   <AwaitResultsView players={this.state.submittedPlayers}/>
+        // }
+        // {this.state.isVotingView
+        //   &&
+        //   <div>
+        //       <div className="Voting-container">
+        //         <div className="Voting-header">
+        //           <div className="Voting-header-title">Vote</div>
+        //           <div className="letter">
+        //           {this.state.categoryLetter}
+        //           </div>
+        //         </div>
+        //         <div className="Voting-form">
+        //           <div className="Voting-form-header"/>
+        //           <VotingView
+        //           categories={this.state.categoriesList}
+        //           categoryLetter={this.state.categoryLetter}
+        //           allAnswers={this.state.allAnswers}
+        //           onChange={this.onChangeVoteCheckbox}
+        //           voteResults={this.state.voteResults}
+        //           onSubmitVotes={this.onSubmitVotes}
+        //           numPlayers={this.state.numPlayers}
+        //           />
+        //           <div className="Voting-form-footer"/>
+        //         </div>
+        //         <div className="Voting-submit">
+        //           <div className="Game-form-submit">
+        //             <Button onClick={this.onSubmitVotes} type='submit'>Submit</Button>
+        //           </div>
+        //         </div>
+        //       </div>
+        //   </div>
+        // }
+        // {this.state.isResultView
+        //   &&
+        //   <ResultView
+        //   scores={this.state.scores}
+        //   handleClick={this.showWinnerPrize}
+        //   currentUser={this.state.username}
+        //   />
+        // }
+        // <CreateForm
+        // show={this.state.modalShowCreateGame}
+        // onHide={() => this.setState({modalShowCreateGame: false})}
+        // onSubmit={this.submitCreateForm}
+        // onChange={this.changeHandler}
+        // />
+        // <JoinForm
+        // show={this.state.modalShowJoinGame}
+        // onHide={() => this.setState({modalShowJoinGame: false})}
+        // onSubmit={(e) => this.submitJoinForm(e)}
+        // onChange={this.changeHandler}
+        // />
+        // <WinnerPrize
+        // show={this.state.showWinnerModal}
+        // onHide={() => this.setState({showWinnerModal: false})}/>
+        //   </div>
+        // </div>
         );
       }
     }
