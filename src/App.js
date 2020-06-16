@@ -10,6 +10,7 @@ import CreateForm from './components/forms/CreateForm';
 import ResultView from './components/ResultView';
 import AwaitResultsView from './components/AwaitResultsView';
 import VotingView from './components/VotingView';
+// eslint-disable-next-line
 import AdminView from './components/AdminView';
 import Timer from './components/Timer';
 

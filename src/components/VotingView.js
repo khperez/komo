@@ -7,16 +7,6 @@ export default function VotingView({
   onChange, voteResults, onSubmitVotes,
   numPlayers
 }) {
-  let findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index)
-  categories.map(category => {
-    var onlyAnswers = [];
-    var allAnswersOne = allAnswers[category.id]
-    Object.keys(allAnswersOne).map(uid => {
-      onlyAnswers.push(allAnswersOne[uid])
-    })
-    debugger
-    console.log(JSON.stringify(onlyAnswers))
-  })
 
   var checkboxes =
   <div>
