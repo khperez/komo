@@ -21,7 +21,9 @@ export default function CreateForm(props) {
   return (
     <div>
       <Modal
-        {...props}
+        show={props.show}
+        onHide={props.onHide}
+        onSubmit={props.onSubmit}
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
         centered

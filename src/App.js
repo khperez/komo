@@ -788,10 +788,9 @@ class App extends Component {
         {this.state.isHostLobbyView
           &&
         <div className="Lobby-view">
-          <HostLobbyView code={this.state.roomCode}
-          onClick={this.startGame}
-          changeHandler={this.changeHandler}
-          submitHandler={this.submitHostFormHandler}
+          <HostLobbyView
+          onChange={this.changeHandler}
+          onSubmit={(e) => this.submitHostFormHandler(e)}
           />
         </div>
         }
