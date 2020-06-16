@@ -1,0 +1,35 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: yarn install
+        run: |
+          yarn install
+      - name: yarn build
+        run: |
+          unset CI
+          yarn run build --if-present
+          CI=true
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
