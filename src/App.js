@@ -112,18 +112,21 @@ class App extends Component {
   }
 
   checkRoomCode = async () => {
-    console.log("checkRoomCode")
-    database.ref(this.state.roomCode).once('value').then((snapshot) => {
-      if (snapshot.exists()) {
-        console.log(this.state.roomCode + " is a valid room");
-        this.updateNumPlayersDbAndLocal();
-        this.setValidRoom(true);
-        return this.state.roomCode
-      } else {
-        alert("This is not a valid room. Please try again");
-        this.setValidRoom(false);
-      }
-    });
+    if (this.state.roomCode !== null) {
+      return database.ref(this.state.roomCode).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+          console.log(this.state.roomCode + " is a valid room");
+          this.updateNumPlayersDbAndLocal();
+          this.setValidRoom(true);
+          return true
+        } else {
+          alert("This is not a valid room. Please try again");
+          this.setValidRoom(false);
+          return false
+        }
+      });
+    }
+    return false;
   }
 
   setHostDb = () => {
@@ -199,12 +202,18 @@ class App extends Component {
   submitJoinForm = (e) => {
     e.preventDefault();
     this.checkRoomCode()
-    .then(this.login()
-    .then(this.createUser))
-    this.setState({
-      isStartView: false,
-      modalShowJoinGame: false,
-      isNonHostLobbyView: true,
+    .then((isValidRoom) => {
+      if (isValidRoom === true) {
+        this.login()
+        .then(this.createUser)
+        .then(() => {
+          this.setState({
+          isStartView: false,
+          modalShowJoinGame: false,
+          isNonHostLobbyView: true,
+          })
+        })
+      }
     })
   }
 
