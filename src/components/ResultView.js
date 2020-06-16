@@ -37,9 +37,9 @@ export default function ResultView({ scores, handleClick, currentUser }) {
             <Col>Player</Col>
             <Col className="Result-heading-score">Score</Col>
           </Row>
-            {sortable.map(item => {
+            {sortable.map((item, index) => {
             return (
-              <Row>
+              <Row key={index}>
                 <Col className="Result-player-name">
                 {item[0]}<span className="Result-player-score">{item[1]}</span>
                 </Col>
