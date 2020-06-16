@@ -26,10 +26,6 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.2.0
-      - name: Download Artifact
-        uses: actions/download-artifact@master
-        with:
-          name: build
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
