@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 
 const config = {
-    apiKey: process.env.KOMO_FIREBASE_API_KEY,
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
     authDomain: "dispersed-lists.firebaseapp.com",
     databaseURL: "https://dispersed-lists.firebaseio.com",
     projectId: "dispersed-lists",
