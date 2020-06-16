@@ -3,7 +3,8 @@ name: master-branch
 on:
   push:
     branches:
-      - 'master'
+      - '**'
+      - '!master'
 
 jobs:
   build:
@@ -29,6 +30,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2.2.0
+      - name: yarn build
+        run: yarn build
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
