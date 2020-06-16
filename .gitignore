@@ -14,7 +14,6 @@ yarn-error.log*
 .npm/
 
 .firebase*
-src/firebase.js
 
 yarn.lock
 
