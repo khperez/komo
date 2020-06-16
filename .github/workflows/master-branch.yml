@@ -1,6 +1,9 @@
-name: CI
+name: master-branch
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
 
 jobs:
   build:
