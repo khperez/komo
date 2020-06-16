@@ -17,3 +17,5 @@ yarn-error.log*
 src/firebase.js
 
 yarn.lock
+
+.env
