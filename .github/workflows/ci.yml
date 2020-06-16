@@ -18,9 +18,7 @@ jobs:
           yarn install
       - name: yarn build
         run: |
-          unset CI
           yarn run build --if-present
-          CI=true
   deploy:
     needs: build
     name: Deploy
