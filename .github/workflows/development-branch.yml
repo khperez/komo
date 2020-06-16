@@ -21,4 +21,4 @@ jobs:
       - name: yarn install
         run: yarn install
       - name: yarn build
-        terun: yarn build
+        run: yarn build
