@@ -491,6 +491,29 @@ class App extends Component {
       .then(() => {return true});
     }
 
+    markDuplicatesAsInvalid(allAnswers, categories) {
+      // Duplicate answers will have their .valid set to false
+      let findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index)
+      for (let i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        var onlyAnswers = [];
+        var allAnswersForOneCategory = allAnswers[category.id]
+        Object.keys(allAnswersForOneCategory).map(uid => {
+          onlyAnswers.push(allAnswersForOneCategory[uid].value.toLowerCase())
+        })
+        onlyAnswers = [...new Set(findDuplicates(onlyAnswers))]
+        if (onlyAnswers.length != 0 || onlyAnswers !== undefined) {
+          Object.keys(allAnswersForOneCategory).map(uid => {
+            if (onlyAnswers.includes(allAnswersForOneCategory[uid].value.toLowerCase())) {
+              allAnswers[category.id][uid].valid = false
+            }
+          })
+        }
+      }
+
+      return allAnswers
+    }
+
     onSubmitAnswers = (event) => {
       if (event) {
         event.preventDefault();
@@ -524,11 +547,12 @@ class App extends Component {
       .on('value', snapshot => {
         if (snapshot.exists()) {
           this.setState({
-            allAnswers: snapshot.val(),
-            voteResults: this.getVoteResults(snapshot.val())
+            allAnswers: this.markDuplicatesAsInvalid(snapshot.val(), this.state.categoriesList)
           }, () => {
             this.setState({
-              isVotingView: true,
+              voteResults: this.getVoteResults(this.state.allAnswers)
+            }, () => {
+              this.setState({ isVotingView: true })
             })
           })
 
