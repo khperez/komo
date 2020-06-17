@@ -1,0 +1,50 @@
+name: master-branch
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.2.0
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: yarn install
+        run: yarn install
+      - name: yarn build
+        run: yarn build
+        env:
+          REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
+      - name: Archive Production Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: build
+          path: build
+
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2.2.0
+      - name: Download Artifact
+        uses: actions/download-artifact@master
+        with:
+          name: build
+          path: build
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting -P dispersed-lists
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

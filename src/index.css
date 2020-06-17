@@ -5,6 +5,7 @@
   --secondary-fg-color: #F4A261;
   --secondary-fg-light-color: #2A9D8F;
 }
+
 .App {
   min-height: 100vh;
   display: flex;
@@ -382,11 +383,164 @@ button.btn.btn-primary {
     -webkit-appearance: none;
     width: 7px;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: rgba(0, 0, 0, .5);
     box-shadow: 0 0 1px rgba(255, 255, 255, .5);
   }
 
+}
+
+.App-title {
+  display: flex;
+  font-family: 'Catamaran', sans-serif;
+  color: #36BFAA;
+  margin: 0px 5px;
+  font-size: 20vh;
+}
+
+.Button-create{
+  background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 16px;
+}
+
+.Game-start-actions {
+  display: flex;
+  min-height: 30vh;
+}
+
+.Host-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Join-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.Room-code-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: row;
+  font-size: 5vh;
+}
+
+.Room-code-host{
+  font-size: 4vh;
+}
+
+.Room-code-id {
+  color: #36BFAA;
+  margin: 0px 5px;
+  font-size: 5vh;
+  border-style: dashed;
+  /* background: #262730; */
+  border-color: #262730;
+  border-width: thin;
+  padding: 3px;
+}
+
+.body {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 70vw;
+}
+
+.playerList {
+  list-style: none;
+  padding-left: 0;
+}
+
+.player {
+  background: #343C5B;
+  border-radius: 10px;
+  color: white;
+  padding: 10px 10px 10px 20px;
+  margin: 10px;
+}
+
+.Host-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 25vh;
+}
+
+.Timer-container {
+  height: 100vh;
+  background: #262730;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.timer {
+  font-size: 100px;
+  padding: 20px;
+  color: #776885;
+  width: 205px;
+  text-align: center;
+}
+
+.Game-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.Game-view {
+  display: flex;
+  height: 100%;
+}
+
+.letter {
+  color: #73C2BE;
+  background:  #32716E;
+  font-size: 10vw;
+  text-align: center;
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  height: 100vh;
+  padding: 20px;
+}
+
+.Game-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+a.Github-link:link {
+  color: rgb(193, 193, 193);
+}
+
+a.Github-link:hover {
+  text-decoration: none;
+}
+
+.Start-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.Made-by {
+  text-align: center;
 }
