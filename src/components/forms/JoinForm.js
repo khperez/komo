@@ -1,12 +1,11 @@
-import React from 'react';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import FormGroup from 'react-bootstrap/FormGroup';
-import { useState } from 'react';
+import React from "react";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import FormGroup from "react-bootstrap/FormGroup";
+import { useState } from "react";
 
 export default function JoinForm(props) {
-
   const [validated, setValidated] = useState(false);
 
   const handleSubmit = (event) => {
@@ -33,31 +32,31 @@ export default function JoinForm(props) {
         </Modal.Header>
         <Modal.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-              <FormGroup>
-                <Form.Label>Room Code</Form.Label>
-                <Form.Control
-                  required
-                  type="text"
-                  minLength="4"
-                  maxLength="4"
-                  placeholder="Enter room code"
-                  name="roomCode"
-                  onChange={props.onChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                  required
-                  type="text"
-                  minLength="1"
-                  maxLength="10"
-                  placeholder="Enter username"
-                  name="username"
-                  onChange={props.onChange}
-                />
-              </FormGroup>
-              <Button type="submit">Submit</Button>
+            <FormGroup>
+              <Form.Label>Room Code</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                minLength="4"
+                maxLength="4"
+                placeholder="Enter room code"
+                name="roomCode"
+                onChange={props.onChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                minLength="1"
+                maxLength="10"
+                placeholder="Enter username"
+                name="username"
+                onChange={props.onChange}
+              />
+            </FormGroup>
+            <Button type="submit">Submit</Button>
           </Form>
         </Modal.Body>
       </Modal>

@@ -51,12 +51,6 @@ class App extends Component {
     };
   }
 
-  handleKeyPress = (event) => {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-    }
-  }
-
   componentDidMount() {
     // Sign out by default for now so we can test the 'Anonymous Login' button.
     // TODO: Probably should remove this in production TM.
@@ -70,8 +64,6 @@ class App extends Component {
         });
       }
     });
-
-    //this.addEventListener('keydown', this.handleKeyPress);
   }
 
   onChangeAnswer = (categoryId, event) => {
@@ -786,7 +778,6 @@ class App extends Component {
       console.log("Component will unmount");
       auth.signOut();
       database.ref(this.state.roomCode+"/abandoned").set(true);
-      //this.removeEventListener('keydown', this.handleKeyPress);
     }
 
     onClickAdminView = () => {

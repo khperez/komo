@@ -1,13 +1,14 @@
-import React from 'react';
-import JoinLobbyForm from './forms/JoinLobbyForm';
+import React from "react";
+import JoinLobbyForm from "./forms/JoinLobbyForm";
 
-export default function JoinView({changeHandler, submitHandler, validRoom}) {
+export default function JoinView({ changeHandler, submitHandler, validRoom }) {
   return (
     <div className="Join-view">
       <JoinLobbyForm
-        changeHandler={changeHandler} 
+        changeHandler={changeHandler}
         submitHandler={submitHandler}
-        validRoom={validRoom}/>
+        validRoom={validRoom}
+      />
     </div>
   );
 }
