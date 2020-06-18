@@ -14,7 +14,7 @@ export default function WinnerPrize(props) {
           <Modal.Header closeButton>
           </Modal.Header>
           <Modal.Body className="Winner-body">
-            <img src={winnerImage} className="yoshi"/>
+            <img src={winnerImage} className="yoshi" alt="beeg yoshi"/>
           </Modal.Body>
         </Modal>
       </div>
