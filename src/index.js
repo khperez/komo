@@ -5,7 +5,7 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
 if (process.env.NODE_ENV === 'production') {
-  console.log = function () {}
+  console.log = function () {};
 }
 
 ReactDOM.render(<App />, document.getElementById('root'));

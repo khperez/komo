@@ -6,7 +6,6 @@ import FormGroup from 'react-bootstrap/FormGroup';
 import { useState } from 'react';
 
 export default function CreateForm(props) {
-
   const [validated, setValidated] = useState(false);
 
   const handleSubmit = (event) => {
@@ -29,25 +28,23 @@ export default function CreateForm(props) {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Create Game
-          </Modal.Title>
+          <Modal.Title id="contained-modal-title-vcenter">Create Game</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
-              <FormGroup>
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                  required
-                  type="text"
-                  minLength="1"
-                  maxLength="10"
-                  placeholder="Enter username"
-                  name="username"
-                  onChange={props.onChange}
-                />
-              </FormGroup>
-              <Button type="submit">Submit</Button>
+            <FormGroup>
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                required
+                type="text"
+                minLength="1"
+                maxLength="10"
+                placeholder="Enter username"
+                name="username"
+                onChange={props.onChange}
+              />
+            </FormGroup>
+            <Button type="submit">Submit</Button>
           </Form>
         </Modal.Body>
       </Modal>
