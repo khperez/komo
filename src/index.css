@@ -296,6 +296,13 @@ button.btn.btn-primary {
     padding: 5vh 20vh;
     margin-bottom: 2rem;
   }
+  .Host-form.form-group {
+    margin: 0px;
+    min-width: 20vw;
+  }
+  .Host-form-category {
+    margin-bottom: 0;
+  }
 
 @media only screen and (max-width: 823px) {
   .App {
