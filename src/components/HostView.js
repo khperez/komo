@@ -1,6 +1,6 @@
-import React from "react";
-import Button from "@material-ui/core/Button";
-import Form from "react-bootstrap/Form";
+import React from 'react';
+import Button from '@material-ui/core/Button';
+import Form from 'react-bootstrap/Form';
 
 function NumCategoriesForm({ changeHandler, submitHandler }) {
   return (

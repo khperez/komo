@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function AwaitResultsView({ players }) {
   const playerList = players.map((player, i) => <li key={i}>{player}</li>);

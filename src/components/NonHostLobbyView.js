@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function NonHostLobbyView({ players, roomCode }) {
   const playerList = players.map((player, i) => (

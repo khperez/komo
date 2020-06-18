@@ -1,5 +1,5 @@
-import React from "react";
-import Form from "react-bootstrap/Form";
+import React from 'react';
+import Form from 'react-bootstrap/Form';
 
 export default function VotingView({
   categories,
@@ -44,7 +44,7 @@ export default function VotingView({
                         type="checkbox"
                         checked={voteResults[category.id][uid]}
                         onChange={onChange.bind(this, category.id, uid)}
-                        label={answer.value + " (Bad answer, boo!)"}
+                        label={answer.value + ' (Bad answer, boo!)'}
                         disabled
                       />
                     </Form.Group>

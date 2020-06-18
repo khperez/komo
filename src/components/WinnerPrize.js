@@ -1,6 +1,6 @@
-import React from "react";
-import Modal from "react-bootstrap/Modal";
-import winnerImage from "../images/winner.png";
+import React from 'react';
+import Modal from 'react-bootstrap/Modal';
+import winnerImage from '../images/winner.png';
 
 export default function WinnerPrize(props) {
   return (
