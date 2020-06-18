@@ -10,7 +10,7 @@ import CreateForm from './components/forms/CreateForm';
 import ResultView from './components/ResultView';
 import AwaitResultsView from './components/AwaitResultsView';
 import VotingView from './components/VotingView';
-import AdminView from './components/AdminView';
+//import AdminView from './components/AdminView';
 import Timer from './components/Timer';
 import WinnerPrize from './components/WinnerPrize';
 import Button from 'react-bootstrap/Button';
@@ -495,18 +495,20 @@ class App extends Component {
       // Duplicate answers will have their .valid set to false
       let findDuplicates = arr => arr.filter((item, index) => arr.indexOf(item) !== index)
       for (let i = 0; i < categories.length; i++) {
-        var category = categories[i];
-        var onlyAnswers = [];
-        var allAnswersForOneCategory = allAnswers[category.id]
+        let category = categories[i];
+        let onlyAnswers = [];
+        let allAnswersForOneCategory = allAnswers[category.id]
         Object.keys(allAnswersForOneCategory).map(uid => {
           onlyAnswers.push(allAnswersForOneCategory[uid].value.toLowerCase())
+          return true
         })
         onlyAnswers = [...new Set(findDuplicates(onlyAnswers))]
-        if (onlyAnswers.length != 0 || onlyAnswers !== undefined) {
+        if (onlyAnswers.length !== 0 || onlyAnswers !== undefined) {
           Object.keys(allAnswersForOneCategory).map(uid => {
             if (onlyAnswers.includes(allAnswersForOneCategory[uid].value.toLowerCase())) {
               allAnswers[category.id][uid].valid = false
             }
+            return true
           })
         }
       }
