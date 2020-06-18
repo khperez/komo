@@ -70,30 +70,24 @@ it('marks each duplicated answer as invalid', () => {
 
   const newAllAnswers = testApp.markDuplicatesAsInvalid(oldAllAnswers, categories);
 
-  expect(newAllAnswers[0]['uid_0'].valid).toBe(false);
-  expect(newAllAnswers[0]['uid_0'].value).toBe(oldAllAnswers[0]['uid_0'].value);
-  expect(newAllAnswers[0]['uid_1'].valid).toBe(false);
-  expect(newAllAnswers[0]['uid_1'].value).toBe(oldAllAnswers[0]['uid_1'].value);
-  expect(newAllAnswers[0]['uid_2'].valid).toBe(true);
-  expect(newAllAnswers[0]['uid_2'].value).toBe(oldAllAnswers[0]['uid_2'].value);
-  expect(newAllAnswers[0]['uid_3'].valid).toBe(true);
-  expect(newAllAnswers[0]['uid_3'].value).toBe(oldAllAnswers[0]['uid_3'].value);
+  expect(newAllAnswers[0]).toStrictEqual({
+    uid_0: { valid: false, value: 'foo' },
+    uid_1: { valid: false, value: 'foo' },
+    uid_2: { valid: true,  value: 'bar' },
+    uid_3: { valid: true,  value: 'baz' },
+  });
 
-  expect(newAllAnswers[1]['uid_0'].valid).toBe(false);
-  expect(newAllAnswers[1]['uid_0'].value).toBe(oldAllAnswers[1]['uid_0'].value);
-  expect(newAllAnswers[1]['uid_1'].valid).toBe(false);
-  expect(newAllAnswers[1]['uid_1'].value).toBe(oldAllAnswers[1]['uid_1'].value);
-  expect(newAllAnswers[1]['uid_2'].valid).toBe(false);
-  expect(newAllAnswers[1]['uid_2'].value).toBe(oldAllAnswers[1]['uid_2'].value);
-  expect(newAllAnswers[1]['uid_3'].valid).toBe(true);
-  expect(newAllAnswers[1]['uid_3'].value).toBe(oldAllAnswers[1]['uid_3'].value);
+  expect(newAllAnswers[1]).toStrictEqual({
+    uid_0: { valid: false, value: 'bar' },
+    uid_1: { valid: false, value: 'bar' },
+    uid_2: { valid: false, value: 'bar' },
+    uid_3: { valid: true,  value: 'baz' },
+  });
 
-  expect(newAllAnswers[2]['uid_0'].valid).toBe(false);
-  expect(newAllAnswers[2]['uid_0'].value).toBe(oldAllAnswers[2]['uid_0'].value);
-  expect(newAllAnswers[2]['uid_1'].valid).toBe(false);
-  expect(newAllAnswers[2]['uid_1'].value).toBe(oldAllAnswers[2]['uid_1'].value);
-  expect(newAllAnswers[2]['uid_2'].valid).toBe(false);
-  expect(newAllAnswers[2]['uid_2'].value).toBe(oldAllAnswers[2]['uid_2'].value);
-  expect(newAllAnswers[2]['uid_3'].valid).toBe(false);
-  expect(newAllAnswers[2]['uid_3'].value).toBe(oldAllAnswers[2]['uid_3'].value);
+  expect(newAllAnswers[2]).toStrictEqual({
+    uid_0: { valid: false, value: 'baz' },
+    uid_1: { valid: false, value: 'baz' },
+    uid_2: { valid: false, value: 'baz' },
+    uid_3: { valid: false, value: 'baz' },
+  });
 });
