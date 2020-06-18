@@ -96,5 +96,4 @@ it('marks each duplicated answer as invalid', () => {
   expect(newAllAnswers[2]['uid_2'].value).toBe(oldAllAnswers[2]['uid_2'].value);
   expect(newAllAnswers[2]['uid_3'].valid).toBe(false);
   expect(newAllAnswers[2]['uid_3'].value).toBe(oldAllAnswers[2]['uid_3'].value);
-
 });
