@@ -1,4 +1,4 @@
-![CI](https://github.com/khperez/komo/workflows/CI/badge.svg?branch=master)
+![master-branch](https://github.com/khperez/komo/workflows/master-branch/badge.svg)
 
 # Komo
 
