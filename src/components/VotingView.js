@@ -1,20 +1,20 @@
 import React from 'react';
 import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
 
 export default function VotingView({
   categories, categoryLetter, allAnswers,
   onChange, voteResults, onSubmitVotes,
   numPlayers
 }) {
-
   var checkboxes =
-  <div>
+  <div className="Voting-categories-checkboxes">
   {categories.map(category => {
     var allAnswersForOneCategory = allAnswers[category.id]
 
     return  <div key={category.id}>
-    <h2 >{category.name}</h2>
+    <div className="Game-form-label">
+      <span className="Game-form-input-index">{category.id+1}</span> {category.name}
+    </div>
     {Object.keys(allAnswersForOneCategory).map(uid=> {
       const answer = allAnswersForOneCategory[uid]
 
@@ -45,10 +45,8 @@ export default function VotingView({
   </div>
 
   return (
-    <div>
-    <h1>Voting View (Letter: {categoryLetter})</h1>
-    {checkboxes}
-    <Button onClick={onSubmitVotes}>Submit Votes</Button>
+    <div className="Vote-view">
+      {checkboxes}
     </div>
     )
   }

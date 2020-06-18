@@ -1,7 +1,7 @@
 import React from 'react';
 
-export default function Timer({timeRemaining}) {
+export default function Timer({timeRemaining, ...props}) {
     return (
-        <div className="timer">{timeRemaining}</div>
+        <div className="timer">{timeRemaining}{props.children}</div>
     )
 }
