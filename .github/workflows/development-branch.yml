@@ -22,6 +22,8 @@ jobs:
         run: yarn install
       - name: yarn build
         run: yarn build
+        env:
+          REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
       - name: yarn test
         run: yarn test
         env:
