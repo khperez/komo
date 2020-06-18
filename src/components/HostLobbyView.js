@@ -33,7 +33,7 @@ export default function HostLobbyView(props) {
               type="number"
               min={min_num_categories}
               max={max_num_categories}
-              placeholder={"Number of catergories (" + min_num_categories + " - " + max_num_categories + ")"}
+              placeholder={"Number of categories (" + min_num_categories + " - " + max_num_categories + ")"}
               name="numCategories"
               onChange={props.onChange}
             />
