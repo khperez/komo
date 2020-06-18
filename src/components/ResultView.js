@@ -30,26 +30,26 @@ export default function ResultView({ scores, handleClick, currentUser }) {
       <h1>Waiting for results...</h1>
       </div>
       )
-    } else {
-      return (
-        <Container className="Results-container">
-          <Row xs={2} md={4} lg={6} className="Result-heading">
-            <Col>Player</Col>
-            <Col className="Result-heading-score">Score</Col>
-          </Row>
-            {sortable.map((item, index) => {
+  } else {
+    return (
+      <Container className="Results-container">
+        <Row xs={2} md={4} lg={6} className="Result-heading">
+          <Col className="Result-heading-player">Player</Col>
+          <Col className="Result-heading-score">Score</Col>
+        </Row>
+          {sortable.map((item, index) => {
             return (
-              <Row key={index}>
+              <Row key={index} className="Result-view-score">
                 <Col className="Result-player-name">
                 {item[0]}<span className="Result-player-score">{item[1]}</span>
                 </Col>
               </Row>
-              )
+            )
           })}
-          { winner &&
-            <Button onClick={handleClick}>Click to claim your prize!</Button>
-          }
-        </Container>
-          )
+        { winner &&
+          <Button onClick={handleClick} className="Result-prize-button">Click to claim your prize!</Button>
         }
-      }
+      </Container>
+    )
+  }
+}

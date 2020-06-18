@@ -12,7 +12,9 @@ export default function VotingView({
     var allAnswersForOneCategory = allAnswers[category.id]
 
     return  <div key={category.id}>
-    <div className="Vote-category">{category.name}</div>
+    <div className="Game-form-label">
+      <span className="Game-form-input-index">{category.id+1}</span> {category.name}
+    </div>
     {Object.keys(allAnswersForOneCategory).map(uid=> {
       const answer = allAnswersForOneCategory[uid]
 

@@ -176,6 +176,7 @@ a.Github-link:visited {
   width: 30%;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .Result-heading {
@@ -183,12 +184,24 @@ a.Github-link:visited {
   flex-direction: row;
   justify-content: space-between;
   font-size: 30px;
+  min-width: 40vw;
+}
+
+.Result-view-score {
+  min-width: 40vw;
+}
+
+.Result-heading-player.col {
+  min-width: 10vw;
 }
 
 .Result-heading-score.col {
+  min-width: 10vw;
   text-align: right;
 }
-
+.Result-prize-button {
+  max-width: 60vw;
+}
 .Result-player-name {
   background: var(--main-fg-color);
   border-radius: 10px;
@@ -206,6 +219,14 @@ a.Github-link:visited {
   color: var(--main-fg-light-color);
   padding: 1px 10px;
   font-size: 3vh;
+}
+
+.Result-heading {
+  min-width: 80vw;
+}
+
+.Result-view-score {
+  min-width: 80vw;
 }
 
 .Lobby-players-connected {
@@ -398,10 +419,11 @@ button.btn.btn-primary {
   }
   .Results-container.container {
     min-height: 100vh;
-    min-width: 60vw;
+    min-width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: 0;
   }
   .Game-form-input-answer {
     min-width: 80vw;
