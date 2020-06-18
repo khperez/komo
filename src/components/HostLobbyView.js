@@ -25,17 +25,10 @@ export default function HostLobbyView(props) {
     <div>
       <div className="Host-view-settings">Game Settings</div>
       <div className="hostView" onSubmit={props.onSubmit}>
-        <Form
-          noValidate
-          validated={validated}
-          onSubmit={handleSubmit}
-          autoComplete="off"
-        >
+        <Form noValidate validated={validated} onSubmit={handleSubmit} autoComplete="off">
           <Form.Group className="Host-form">
             <div className="Host-form-category-container">
-              <Form.Label className="Host-form-category">
-                Number of categories
-              </Form.Label>
+              <Form.Label className="Host-form-category">Number of categories</Form.Label>
               <Form.Control
                 required
                 type="number"
@@ -47,17 +40,13 @@ export default function HostLobbyView(props) {
               />
             </div>
             <div>
-              <Form.Label className="Host-form-category">
-                Timer (seconds)
-              </Form.Label>
+              <Form.Label className="Host-form-category">Timer (seconds)</Form.Label>
               <Form.Control
                 required
                 type="number"
                 min={min_timer_in_seconds}
                 max={max_timer_in_seconds}
-                placeholder={
-                  min_timer_in_seconds + " - " + max_timer_in_seconds
-                }
+                placeholder={min_timer_in_seconds + " - " + max_timer_in_seconds}
                 name="timeRemaining"
                 onChange={props.onChange}
               />

@@ -7,10 +7,7 @@ function NumCategoriesForm({ changeHandler, submitHandler }) {
     <div className="hostView">
       <form onSubmit={submitHandler} autoComplete="off">
         <Form.Group className="Host-form" onChange={changeHandler}>
-          <Form.Control
-            placeholder="number of categories"
-            name="numCategories"
-          />
+          <Form.Control placeholder="number of categories" name="numCategories" />
           <Form.Control placeholder="timer in seconds" name="timeRemaining" />
         </Form.Group>
         <p>
@@ -27,10 +24,7 @@ export default function HostView({ changeHandler, submitHandler }) {
   return (
     <div>
       <h1>Game Settings</h1>
-      <NumCategoriesForm
-        changeHandler={changeHandler}
-        submitHandler={submitHandler}
-      />
+      <NumCategoriesForm changeHandler={changeHandler} submitHandler={submitHandler} />
     </div>
   );
 }

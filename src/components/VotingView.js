@@ -18,8 +18,7 @@ export default function VotingView({
         return (
           <div key={category.id}>
             <div className="Game-form-label">
-              <span className="Game-form-input-index">{category.id + 1}</span>{" "}
-              {category.name}
+              <span className="Game-form-input-index">{category.id + 1}</span> {category.name}
             </div>
             {Object.keys(allAnswersForOneCategory).map((uid) => {
               const answer = allAnswersForOneCategory[uid];

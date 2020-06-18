@@ -28,9 +28,7 @@ export default function CreateForm(props) {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Create Game
-          </Modal.Title>
+          <Modal.Title id="contained-modal-title-vcenter">Create Game</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form noValidate validated={validated} onSubmit={handleSubmit}>
