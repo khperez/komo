@@ -291,10 +291,29 @@ button.btn.btn-primary {
     color: var(--main-fg-color);
   }
 
-  .Game-form {
+  .Game-form-container {
     overflow-y: scroll;
     padding: 5vh 20vh;
     margin-bottom: 2rem;
+  }
+  .Game-form-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .Game-form-label {
+    background: var(--main-fg-light-color);
+    border-radius: 10px;
+    padding: 3px 10px 2px 0px;
+  }
+  .Game-form-input-index {
+    background: var(--main-bg-color);
+    color: var(--main-fg-light-color);
+    border-radius: 10px;
+    padding: 5px 10px;
+  }
+  .Game-form-input-answer {
+    min-width: 50vw;
   }
   .Host-form.form-group {
     margin: 0px;
@@ -383,6 +402,9 @@ button.btn.btn-primary {
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+  .Game-form-input-answer {
+    min-width: 80vw;
   }
 
   ::-webkit-scrollbar {
