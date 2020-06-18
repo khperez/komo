@@ -13,8 +13,6 @@ yarn-error.log*
 /.changelog
 .npm/
 
-.firebase*
-
 yarn.lock
 
 .env
