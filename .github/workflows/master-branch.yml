@@ -23,6 +23,8 @@ jobs:
         run: yarn build
         env:
           REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
+      - name: yarn test
+        run: yarn test
       - name: Archive Production Artifact
         uses: actions/upload-artifact@master
         with:
