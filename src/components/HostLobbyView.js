@@ -1,10 +1,9 @@
-import React from "react";
-import Button from "@material-ui/core/Button";
-import Form from "react-bootstrap/Form";
+import React from 'react';
+import Button from '@material-ui/core/Button';
+import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 
 export default function HostLobbyView(props) {
-
   const [validated, setValidated] = useState(false);
 
   const handleSubmit = (event) => {
@@ -16,11 +15,11 @@ export default function HostLobbyView(props) {
     setValidated(true);
   };
 
-  const min_num_categories = "1";
-  const max_num_categories = "20";
+  const min_num_categories = '1';
+  const max_num_categories = '20';
 
-  const min_timer_in_seconds = "1";
-  const max_timer_in_seconds = "999";
+  const min_timer_in_seconds = '1';
+  const max_timer_in_seconds = '999';
 
   return (
     <div>
@@ -35,7 +34,7 @@ export default function HostLobbyView(props) {
                 type="number"
                 min={min_num_categories}
                 max={max_num_categories}
-                placeholder={min_num_categories + " - " + max_num_categories}
+                placeholder={min_num_categories + ' - ' + max_num_categories}
                 name="numCategories"
                 onChange={props.onChange}
               />
@@ -47,14 +46,16 @@ export default function HostLobbyView(props) {
                 type="number"
                 min={min_timer_in_seconds}
                 max={max_timer_in_seconds}
-                placeholder={min_timer_in_seconds + " - " + max_timer_in_seconds}
+                placeholder={min_timer_in_seconds + ' - ' + max_timer_in_seconds}
                 name="timeRemaining"
                 onChange={props.onChange}
               />
             </div>
           </Form.Group>
           <div className="Host-settings-submit">
-            <Button type="submit" variant="contained">Start Game</Button>
+            <Button type="submit" variant="contained">
+              Start Game
+            </Button>
           </div>
         </Form>
       </div>
